@@ -16,7 +16,7 @@
 #### Wissenschaftliche Hilfskraft und Tutor · FAU Erlangen-Nürnberg (11/2023 – 08/2026, Erlangen)
 Parallele Tätigkeiten an vier Lehrstühlen während des Masterstudiums
 
-##### Lehrstuhl für Konstruktionstechnik (KTMFK) (04/2025 – 02/2026)
+##### Lehrstuhl für Konstruktionstechnik (KTmfk) (04/2025 – 02/2026)
 Werkzeuge: Python, Siemens NX, PTC Creo, NXOpen API, MATLAB Simscape/Simulink, TensorFlow, Transformers
 - Entwicklung eines Werkzeugs in Python mit der NXOpen API zur automatischen Überführung von Baugruppen aus Siemens NX in XML-Dateien für MATLAB Simscape, in Kooperation mit Siemens
 - Training eines Transformer-Modells zur Zuordnung von NX-Zwangsbedingungen zu den passenden Gelenken in PTC Creo sowie Überprüfung der Zuordnungen an der Testbaugruppe eines elektrisch angetriebenen Schuhs in Siemens NX und PTC Creo
@@ -48,9 +48,10 @@ Werkzeuge: ServiceNow, JavaScript, REST API, Jira
 ### Projekte
 
 #### PINN zur Parameteridentifikation in Verbundwerkstoffen (10/2025 – 02/2026, Masterarbeit)
-Werkzeuge: PyTorch, Python, MATLAB, NumPy, SciPy
+Werkzeuge: PyTorch, Python, MATLAB, NumPy, SciPy, DeepONet, Surrogatmodelle
 Code: https://github.com/Sumanthreddy-DE/PINN-for-composite-interface-identification
 - Entwicklung eines physikinformierten neuronalen Netzes zur inversen Identifikation von Grenzflächenparametern in Verbundwerkstoffen aus effektiven Kompressions- und Schubmoduli
+- Erprobung vorwärtsgerichteter Surrogatnetze und eines DeepONet, die das inverse Problem nicht lösten, vor der Wahl des PINN
 - Steigerung der Modellgenauigkeit durch Korrektur falsch annotierter Grenzfälle, adaptive Verlustgewichtung und Gradientenbegrenzung, Senkung des Vorhersagefehlers auf unter fünf Prozent
 
 #### SimReady: KI-Assistent für die FEA-Vorverarbeitung (03/2026 – heute, Projekt)
@@ -73,7 +74,7 @@ Code: https://github.com/Sumanthreddy-DE/Peak-Power-Minimization
 ### Kenntnisse
 - Programmierung: Python, C++ (deal.II), MATLAB, Fortran, Git
 - Machine Learning: PyTorch, PyTorch Geometric, TensorFlow, Transformers, scikit-learn, Pandas, NumPy, SciPy, Streamlit
-- ML-Methoden: PINN, Graph Neural Networks, LLM-Fine-Tuning, NER, inverse Parameteridentifikation
+- ML-Methoden: PINN, DeepONet, Surrogatmodelle, Graph Neural Networks, LLM-Fine-Tuning, NER, inverse Parameteridentifikation
 - Simulation und FEM: Technische Mechanik, Festigkeitslehre, Werkstoffkunde, FEM, Kontinuumsmechanik, Modalanalyse, Topologieoptimierung, Mehrkörpersimulation, ANSYS Workbench, Simufact Forming, MATLAB Simscape/Simulink, ParaView
 - CAD und Automatisierung: Siemens NX, NXOpen API (Python), PTC Creo, SolidWorks, STEP/pythonocc
 - Werkstoffprüfung: Druck- und Relaxationsversuche, Tieftemperaturbehandlung
