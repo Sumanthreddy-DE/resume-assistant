@@ -17,7 +17,7 @@ def test_fifteen_unique_cases():
 
 def test_negated_claim_is_not_flagged_but_a_false_one_is():
     c = case("siemens-de")
-    good = "Nein. Er war an der FAU angestellt und nicht bei Siemens angestellt."
+    good = "Nein. Siemens war Kooperationspartner, er war dort nicht angestellt."
     bad = "Nein, aber er war bei Siemens angestellt, sagt die FAU."
     assert auto_flags(c, good) == []
     assert any(f.startswith("verboten") for f in auto_flags(c, bad))
@@ -34,8 +34,8 @@ def test_md_cell_escapes_pipes_and_newlines():
 
 def test_siemens_en_negations_are_not_flagged():
     c = case("siemens-en")
-    for good in ("No, he never worked for Siemens; he was employed by FAU.",
-                 "No. He wasn't employed by Siemens, the university FAU employed him."):
+    for good in ("No, he never worked for Siemens; Siemens was a cooperation partner.",
+                 "No. Siemens was a partner, not his employer."):
         assert auto_flags(c, good) == [], good
 
 

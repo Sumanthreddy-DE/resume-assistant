@@ -45,6 +45,15 @@ def test_bucket_is_full_again_after_ten_minutes():
     assert not b.allow("a")
 
 
+def test_stale_entry_pruned_from_state_after_per_seconds_inactivity():
+    c = Clock()
+    b = TokenBucket(clock=c)
+    b.allow("a")
+    c.t = 661  # past per_seconds (600) of inactivity and past the 60s prune cadence
+    b.allow("other-key")
+    assert "a" not in b._state
+
+
 def test_daily_cap_blocks_then_resets_next_day():
     day = {"v": date(2026, 10, 9)}
     cap = DailyCap(2, today=lambda: day["v"])

@@ -75,6 +75,11 @@ def test_server_and_connection_errors_become_error():
         {"type": "fallback", "reason": "error"}]
 
 
+def test_unexpected_exception_mid_stream_becomes_error_fallback():
+    events, _ = run(FakeStream(exc=ValueError("x")))
+    assert events == [{"type": "fallback", "reason": "error"}]
+
+
 def test_model_options_per_model():
     _, haiku = run(FakeStream(["x"]), model="claude-haiku-4-5")
     _, sonnet = run(FakeStream(["x"]), model="claude-sonnet-5")

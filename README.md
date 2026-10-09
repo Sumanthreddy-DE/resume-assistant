@@ -43,7 +43,8 @@ spend limit · kill switch `BOT_ENABLED`.
 
 No questions, answers or IP addresses are logged or stored (uvicorn runs with
 `--no-access-log`, Caddy has no access log configured). Conversation history lives
-only in the visitor's open page.
+only in the visitor's open page. IP addresses are held in memory for at most ten
+minutes for rate limiting and never written anywhere.
 
 ## Deploy
 

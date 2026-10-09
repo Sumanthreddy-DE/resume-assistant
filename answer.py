@@ -98,6 +98,9 @@ def stream_answer(client, model, system, messages):
     except anthropic.APIConnectionError as exc:
         yield _fallback("error", exc)
         return
+    except Exception as exc:  # anything else mid-stream still ends in a fallback event
+        yield _fallback("error", exc)
+        return
     if final.stop_reason != "end_turn":
         yield _fallback("truncated")
         return
