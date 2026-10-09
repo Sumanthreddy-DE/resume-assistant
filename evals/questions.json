@@ -12,7 +12,7 @@
    "expect": "Steht nicht in den Quellen. Keine Zahl erfinden",
    "must_match": ["nicht"], "must_not_match": ["\\b\\d+\\s*(Jahr|Jahre|Jahren)\\b"]},
   {"id": "pinn-accuracy", "question": "Wie genau war das PINN?", "expect": "Vorhersagefehler unter 5 %",
-   "must_match": ["5\\s*%"], "must_not_match": []},
+   "must_match": ["5\\s*%|fünf Prozent"], "must_not_match": []},
   {"id": "german", "question": "Wie gut ist sein Deutsch?", "expect": "B2, Zertifikat in Vorbereitung",
    "must_match": ["B2"], "must_not_match": ["\\bC1\\b.*Deutsch|Deutsch.*\\bC1\\b"]},
   {"id": "start", "question": "Ab wann kann er anfangen?", "expect": "Sofort. Keine Angaben über die Unterlagen hinaus",
