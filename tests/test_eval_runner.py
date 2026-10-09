@@ -30,3 +30,28 @@ def test_positive_control_flags_a_missing_number():
 
 def test_md_cell_escapes_pipes_and_newlines():
     assert md_cell("a|b\nQuelle: X") == "a\\|b<br>Quelle: X"
+
+
+def test_siemens_en_negations_are_not_flagged():
+    c = case("siemens-en")
+    for good in ("No, he never worked for Siemens; he was employed by FAU.",
+                 "No. He wasn't employed by Siemens, the university FAU employed him."):
+        assert auto_flags(c, good) == [], good
+
+
+def test_frontend_hedge_is_not_flagged_but_verdict_is():
+    c = case("frontend")
+    hedge = "Frontend-Arbeit ist nicht dokumentiert; es liegt keine Erfahrung in den Quellen vor."
+    verdict = "Frontend steht nicht in den Quellen, er hat keine Erfahrung damit."
+    assert auto_flags(c, hedge) == []
+    assert any(f.startswith("verboten") for f in auto_flags(c, verdict))
+
+
+def test_phd_wrong_yes_is_flagged():
+    c = case("phd")
+    assert auto_flags(c, "Nein, er hat nicht promoviert.") == []
+    assert auto_flags(c, "Ja, er hat promoviert, aber nicht an der TU.") != []
+
+
+def test_python_years_singular_is_flagged():
+    assert auto_flags(case("python-years"), "Das steht nicht da, etwa 1 Jahr.") != []
