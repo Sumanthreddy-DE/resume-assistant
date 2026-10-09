@@ -1,0 +1,9 @@
+api.sumanthreddy.de {
+	request_body {
+		max_size 32KB
+	}
+	reverse_proxy 127.0.0.1:8100 {
+		flush_interval -1
+	}
+	header -Server
+}
