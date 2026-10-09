@@ -85,6 +85,17 @@ def test_model_options_per_model():
     _, sonnet = run(FakeStream(["x"]), model="claude-sonnet-5")
     assert "thinking" not in haiku.calls[0] and "output_config" not in haiku.calls[0]
     assert sonnet.calls[0]["thinking"] == {"type": "disabled"}
+    assert haiku.calls[0]["max_tokens"] == 600
+
+
+def test_haiku_5_5_thinks_at_low_effort_with_room_for_thinking():
+    # Haiku 5.5 thinks adaptively by default and its thinking counts toward max_tokens,
+    # so it gets low effort and a larger ceiling instead of a disabled thinking switch.
+    _, client = run(FakeStream(["x"]), model="claude-haiku-5-5")
+    call = client.calls[0]
+    assert call["output_config"] == {"effort": "low"}
+    assert call["max_tokens"] == 2000
+    assert "thinking" not in call
 
 
 def test_system_block_is_cached_and_holds_corpus():

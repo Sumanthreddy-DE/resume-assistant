@@ -8,7 +8,7 @@ import anthropic
 
 from answer import CorpusCache, build_system
 
-MINIMUM = {"claude-haiku-4-5": 4096, "claude-sonnet-5": 1024}
+MINIMUM = {"claude-haiku-4-5": 4096, "claude-sonnet-5": 1024, "claude-haiku-5-5": 512}
 
 
 def main():

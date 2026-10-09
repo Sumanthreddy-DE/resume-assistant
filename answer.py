@@ -69,10 +69,14 @@ def build_system(corpus):
 
 def model_options(model):
     # Sonnet 5 thinks adaptively unless told otherwise. Haiku 4.5 does not think by
-    # default and rejects `effort`, so it gets nothing extra.
+    # default and rejects `effort`, so it gets nothing extra. Haiku 5.5 always thinks
+    # adaptively and its thinking counts toward max_tokens: low effort, more room.
+    options = {"max_tokens": MAX_TOKENS}
     if model.startswith("claude-sonnet-5"):
-        return {"thinking": {"type": "disabled"}}
-    return {}
+        options["thinking"] = {"type": "disabled"}
+    elif model.startswith("claude-haiku-5-5"):
+        options.update(output_config={"effort": "low"}, max_tokens=2000)
+    return options
 
 
 def _fallback(reason, exc=None):
@@ -84,8 +88,8 @@ def _fallback(reason, exc=None):
 def stream_answer(client, model, system, messages):
     """Yield protocol events: zero or more deltas, then exactly one done or fallback."""
     try:
-        with client.messages.stream(model=model, max_tokens=MAX_TOKENS, system=system,
-                                    messages=messages, **model_options(model)) as stream:
+        with client.messages.stream(model=model, system=system, messages=messages,
+                                    **model_options(model)) as stream:
             for text in stream.text_stream:
                 yield {"type": "delta", "text": text}
             final = stream.get_final_message()
