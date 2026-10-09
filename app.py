@@ -82,6 +82,16 @@ def client_ip(request):
     return request.client.host if request.client else "unknown"
 
 
+async def read_capped(request, limit):
+    """Read the body, stopping as soon as it exceeds `limit` bytes. None = too large."""
+    body = bytearray()
+    async for chunk in request.stream():
+        body += chunk
+        if len(body) > limit:
+            return None
+    return bytes(body)
+
+
 def ndjson(events):
     for event in events:
         yield json.dumps(event, ensure_ascii=False) + "\n"
@@ -110,8 +120,8 @@ def create_app(settings, streamer, corpus, bucket=None, cap=None):
         declared = request.headers.get("content-length", "")
         if declared.isdigit() and int(declared) > MAX_BODY:
             return JSONResponse({"detail": "body too large"}, status_code=413)
-        raw = await request.body()
-        if len(raw) > MAX_BODY:
+        raw = await read_capped(request, MAX_BODY)
+        if raw is None:
             return JSONResponse({"detail": "body too large"}, status_code=413)
         try:
             messages = build_messages(ChatRequest.model_validate_json(raw))
