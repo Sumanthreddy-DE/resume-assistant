@@ -1,6 +1,9 @@
 import json
 from pathlib import Path
 
+import httpx
+
+from evals import run_eval
 from evals.run_eval import auto_flags, md_cell
 
 CASES = json.loads((Path(__file__).resolve().parents[1] / "evals" / "questions.json").read_text(encoding="utf-8"))
@@ -55,3 +58,11 @@ def test_phd_wrong_yes_is_flagged():
 
 def test_python_years_singular_is_flagged():
     assert auto_flags(case("python-years"), "Das steht nicht da, etwa 1 Jahr.") != []
+
+
+def test_a_network_error_on_one_case_does_not_lose_the_run(monkeypatch):
+    def broken(*args, **kwargs):
+        raise httpx.ConnectError("getaddrinfo failed")
+    monkeypatch.setattr(run_eval, "run_case", broken)
+    text, end = run_eval.run_case_safely(None, "u", case("phd"), 0)
+    assert text == "" and end == {"type": "fallback", "reason": "harness: ConnectError"}

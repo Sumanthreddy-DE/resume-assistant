@@ -53,6 +53,14 @@ def run_case(client, url, case, pause):
     return ask(client, url, case["question"], history)
 
 
+def run_case_safely(client, url, case, pause):
+    """A network error on the laptop marks one row instead of losing the whole run."""
+    try:
+        return run_case(client, url, case, pause)
+    except httpx.HTTPError as exc:
+        return "", {"type": "fallback", "reason": f"harness: {type(exc).__name__}"}
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", required=True)
@@ -63,7 +71,7 @@ def main():
     rows, models, fallbacks, cache_reads = [], set(), 0, []
     with httpx.Client(timeout=60.0) as client:
         for i, case in enumerate(cases):
-            text, end = run_case(client, url, case, args.pause)
+            text, end = run_case_safely(client, url, case, args.pause)
             end = end or {"type": "fallback", "reason": "no end event"}
             if end["type"] == "done":
                 models.add(end["model"])
