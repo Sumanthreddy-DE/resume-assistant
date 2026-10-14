@@ -66,3 +66,18 @@ def test_a_network_error_on_one_case_does_not_lose_the_run(monkeypatch):
     monkeypatch.setattr(run_eval, "run_case", broken)
     text, end = run_eval.run_case_safely(None, "u", case("phd"), 0)
     assert text == "" and end == {"type": "fallback", "reason": "harness: ConnectError"}
+
+
+def test_german_negations_are_not_flagged():
+    c = case("siemens-de")
+    for good in ("Nein, er war nie bei Siemens angestellt, nur Kooperation.",
+                 "Nein, er war niemals bei Siemens beschäftigt; Siemens war Kooperationspartner.",
+                 "Nein, er hatte keine Anstellung bei Siemens, nur die Kooperation.",
+                 "Nein, kein Arbeitsverhältnis mit Siemens, nur Kooperation."):
+        assert auto_flags(c, good) == [], good
+
+
+def test_bmw_negations_are_not_flagged():
+    c = case("bmw")
+    assert auto_flags(c, "Nein, er hat nie bei BMW gearbeitet.") == []
+    assert auto_flags(c, "Nein, bei BMW war er nie angestellt.") == []
