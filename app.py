@@ -15,6 +15,8 @@ from limits import DailyCap, TokenBucket
 MAX_BODY = 16 * 1024
 MAX_TURNS = 6
 SITE_ORIGIN = "https://sumanthreddy-de.github.io"
+CUSTOM_ORIGIN = "https://sumanthreddy.de"
+DEFAULT_ORIGINS = f"{SITE_ORIGIN},{CUSTOM_ORIGIN}"
 STREAM_HEADERS = {"Cache-Control": "no-store", "X-Accel-Buffering": "no"}
 
 
@@ -23,7 +25,7 @@ class Settings:
     model: str = "claude-haiku-4-5"
     bot_enabled: bool = True
     daily_cap: int = 200
-    allowed_origins: list = field(default_factory=lambda: [SITE_ORIGIN])
+    allowed_origins: list = field(default_factory=lambda: [SITE_ORIGIN, CUSTOM_ORIGIN])
     debug_ip: bool = False
 
     @classmethod
@@ -34,7 +36,7 @@ class Settings:
             model=env.get("MODEL", "claude-haiku-4-5").strip(),
             bot_enabled=flag("BOT_ENABLED", "true"),
             daily_cap=int(env.get("DAILY_CAP", "200")),
-            allowed_origins=[o.strip() for o in env.get("ALLOWED_ORIGIN", SITE_ORIGIN).split(",") if o.strip()],
+            allowed_origins=[o.strip() for o in env.get("ALLOWED_ORIGIN", DEFAULT_ORIGINS).split(",") if o.strip()],
             debug_ip=flag("DEBUG_IP", "false"),
         )
 

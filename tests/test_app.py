@@ -123,10 +123,11 @@ def test_daily_cap_returns_fallback():
 
 def test_cors_allows_only_the_site():
     client, _ = make()
-    ok = client.options("/chat", headers={"Origin": ORIGIN, "Access-Control-Request-Method": "POST"})
+    for allowed in (ORIGIN, "https://sumanthreddy.de"):
+        ok = client.options("/chat", headers={"Origin": allowed, "Access-Control-Request-Method": "POST"})
+        assert ok.headers.get("access-control-allow-origin") == allowed
     evil = client.options("/chat", headers={"Origin": "https://evil.example",
                                             "Access-Control-Request-Method": "POST"})
-    assert ok.headers.get("access-control-allow-origin") == ORIGIN
     assert "access-control-allow-origin" not in evil.headers
 
 
