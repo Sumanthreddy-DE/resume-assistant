@@ -52,7 +52,7 @@ def run(stream, model="claude-haiku-4-5"):
 def test_streams_deltas_then_done():
     events, client = run(FakeStream(["Er ", "hat."], cache_read=4200))
     assert events == [{"type": "delta", "text": "Er "}, {"type": "delta", "text": "hat."},
-                      {"type": "done", "model": "claude-haiku-4-5", "cache_read": 4200}]
+                      {"type": "done", "model": "claude-haiku-4-5", "cache_read": 4200, "tools": 0}]
     assert client.calls[0]["max_tokens"] == 600
     assert client.calls[0]["messages"] == MSGS
 

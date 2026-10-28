@@ -6,7 +6,7 @@ from app import Settings, create_app
 from limits import DailyCap, TokenBucket
 
 ORIGIN = "https://sumanthreddy-de.github.io"
-DONE = [{"type": "delta", "text": "Hallo"}, {"type": "done", "model": "m", "cache_read": 0}]
+DONE = [{"type": "delta", "text": "Hallo"}, {"type": "done", "model": "m", "cache_read": 0, "tools": 0}]
 
 
 class StubCorpus:

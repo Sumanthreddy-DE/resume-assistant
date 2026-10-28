@@ -11,6 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from answer import CorpusCache, build_system, stream_answer
 from limits import DailyCap, TokenBucket
+from tools import RepoCache
 
 MAX_BODY = 16 * 1024
 MAX_TURNS = 6
@@ -147,8 +148,9 @@ def get_app():
     client = anthropic.Anthropic(timeout=30.0)
     corpus = CorpusCache()
     corpus.refresh()
+    repos = RepoCache()
 
     def streamer(system, messages):
-        return stream_answer(client, settings.model, system, messages)
+        return stream_answer(client, settings.model, system, messages, cache=repos)
 
     return create_app(settings, streamer, corpus)
