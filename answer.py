@@ -122,11 +122,14 @@ def stream_answer(client, model, system, messages, cache=None):
         limited = rounds >= MAX_TOOL_ROUNDS
         call = _call(client, model, system, messages, TOOLS,
                      {"type": "none"} if limited else None)
+        streamed = False
         try:
             # Not `yield from`: that swallows the generator's StopIteration, and with it
             # the final message the sub-generator returns.
             while True:
-                yield next(call)
+                event = next(call)
+                streamed = True
+                yield event
         except StopIteration as stop:
             final = stop.value
         except anthropic.RateLimitError as exc:
@@ -171,3 +174,7 @@ def stream_answer(client, model, system, messages, cache=None):
             results.append({"type": "tool_result", "tool_use_id": block["id"],
                             "content": json.dumps(result, ensure_ascii=False)})
         messages.append({"role": "user", "content": results})
+        if streamed:
+            # Text before a tool call and text after it are two paragraphs; without this
+            # the visitor reads "...nach.SimReady wurde...".
+            yield {"type": "delta", "text": "\n\n"}

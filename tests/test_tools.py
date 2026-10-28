@@ -79,6 +79,7 @@ def test_tool_round_order_and_count():
         {"type": "delta", "text": "nach."},
         {"type": "tool", "name": "get_repo_activity", "repo": "Peak-Power-Minimization",
          "status": "ok", "summary": "Peak-Power-Minimization · letzter Commit 14.09.2026"},
+        {"type": "delta", "text": "\n\n"},
         {"type": "delta", "text": "Es "},
         {"type": "delta", "text": "läuft."},
         {"type": "done", "model": "claude-haiku-4-5", "cache_read": 2400, "tools": 1},
@@ -104,6 +105,29 @@ def test_unknown_repo_is_rejected_and_nothing_is_fetched():
     assert content == {"error": "unknown repo"} and event is None and calls == []
     assert tools.run_tool("bash", {"repo": "simready"}, tools.RepoCache(fetch=fetch))[0] == {"error": "unknown repo"}
     assert calls == []
+
+
+def test_text_after_a_tool_round_is_separated_by_a_blank_line():
+    streams = [
+        FakeStream(["Ich schaue nach."], message("tool_use", [
+            TextBlock(type="text", text="Ich schaue nach."), tool_use("simready")])),
+        FakeStream(["Antwort."], message("end_turn", [TextBlock(type="text", text="Antwort.")])),
+    ]
+    events, _ = run_script(streams, cache=tools.RepoCache(fetch=fake_fetch))
+
+    joined = "".join(e["text"] for e in events if e["type"] == "delta")
+    assert joined == "Ich schaue nach.\n\nAntwort."
+    assert events[-1]["type"] == "done"
+
+
+def test_no_separator_when_the_tool_round_streamed_no_text():
+    streams = [
+        FakeStream([], message("tool_use", [tool_use("Peak-Power-Minimization")])),
+        FakeStream(["Antwort."], message("end_turn", [TextBlock(type="text", text="Antwort.")])),
+    ]
+    events, _ = run_script(streams, cache=tools.RepoCache(fetch=fake_fetch))
+
+    assert "".join(e["text"] for e in events if e["type"] == "delta") == "Antwort."
 
 
 def test_github_failure_yields_error_event_and_answer_still_finishes():
