@@ -17,10 +17,13 @@ from pathlib import Path
 import httpx
 
 HERE = Path(__file__).resolve().parent
+RELATIVE_TIME = re.compile(
+    r"(?i)vor \d+ (Tag|Woche|Monat|Jahr)|läuft noch|\b\d+ (days|weeks|months) ago\b"
+)
 
 
 def ask(client, url, question, history):
-    text, end = "", None
+    text, end, tools = "", None, []
     with client.stream("POST", f"{url}/chat", json={"question": question, "history": history}) as r:
         r.raise_for_status()
         for line in r.iter_lines():
@@ -29,15 +32,29 @@ def ask(client, url, question, history):
             event = json.loads(line)
             if event["type"] == "delta":
                 text += event["text"]
-            else:
+            elif event["type"] == "tool":
+                tools.append(event)
+            elif event["type"] in ("done", "fallback"):
                 end = event
-    return text, end
+    return text, end, tools
 
 
-def auto_flags(case, answer):
+def auto_flags(case, answer, tools=()):
     flags = [f"fehlt: /{p}/" for p in case.get("must_match", []) if not re.search(p, answer, re.I)]
     flags += [f"verboten: /{p}/" for p in case.get("must_not_match", []) if re.search(p, answer, re.I)]
+    expect_tool = case.get("expect_tool", False)
+    if expect_tool and not tools:
+        flags.append("Tool erwartet, nicht aufgerufen")
+    elif not expect_tool and tools:
+        repos = ", ".join(t.get("repo", "?") for t in tools)
+        flags.append(f"Tool unerwartet aufgerufen: {repos}")
+    if tools and RELATIVE_TIME.search(answer):
+        flags.append("relative Zeitangabe")
     return flags
+
+
+def format_tools(tools):
+    return ", ".join(f"{t.get('repo', '?')}:{t.get('status', '?')}" for t in tools) or "-"
 
 
 def md_cell(text):
@@ -47,7 +64,7 @@ def md_cell(text):
 def run_case(client, url, case, pause):
     history = list(case.get("history", []))
     for setup_question in case.get("setup", []):
-        text, _ = ask(client, url, setup_question, history)
+        text, _, _ = ask(client, url, setup_question, history)
         history += [{"role": "user", "content": setup_question}, {"role": "assistant", "content": text.strip()}]
         time.sleep(pause)
     return ask(client, url, case["question"], history)
@@ -58,7 +75,7 @@ def run_case_safely(client, url, case, pause):
     try:
         return run_case(client, url, case, pause)
     except httpx.HTTPError as exc:
-        return "", {"type": "fallback", "reason": f"harness: {type(exc).__name__}"}
+        return "", {"type": "fallback", "reason": f"harness: {type(exc).__name__}"}, []
 
 
 def main():
@@ -68,21 +85,23 @@ def main():
     args = parser.parse_args()
     url = args.url.rstrip("/")
     cases = json.loads((HERE / "questions.json").read_text(encoding="utf-8"))
-    rows, models, fallbacks, cache_reads = [], set(), 0, []
+    rows, models, fallbacks, cache_reads, tool_counts = [], set(), 0, [], []
     with httpx.Client(timeout=60.0) as client:
         for i, case in enumerate(cases):
-            text, end = run_case_safely(client, url, case, args.pause)
+            text, end, tools = run_case_safely(client, url, case, args.pause)
             end = end or {"type": "fallback", "reason": "no end event"}
             if end["type"] == "done":
                 models.add(end["model"])
                 cache_reads.append(end["cache_read"])
+                tool_counts.append(end.get("tools", 0))
                 outcome = end["model"]
             else:
                 fallbacks += 1
                 outcome = f"FALLBACK: {end['reason']}"
-            flags = auto_flags(case, text) if end["type"] == "done" else ["kein Modelltext"]
+            flags = auto_flags(case, text, tools) if end["type"] == "done" else ["kein Modelltext"]
+            tool_col = format_tools(tools)
             rows.append(f"| {case['id']} | {md_cell(case['question'])} | {md_cell(case['expect'])} | "
-                        f"{md_cell(text)} | {md_cell('; '.join(flags))} | {outcome} |  |")
+                        f"{md_cell(text)} | {md_cell('; '.join(flags))} | {md_cell(tool_col)} | {outcome} |  |")
             print(f"[{i + 1}/{len(cases)}] {case['id']}: {outcome} {flags}", flush=True)
             if case["id"] == "positive-control" and flags:
                 print("  POSITIVE CONTROL FAILED – check the harness and corpus before blaming the model")
@@ -91,9 +110,10 @@ def main():
     label = "-".join(sorted(models)) or "no-model"
     out = HERE / "results" / f"{date.today().isoformat()}-{label}.md"
     header = ["# Eval run", "", f"- URL: {url}", f"- Models seen: {', '.join(sorted(models)) or 'none'}",
-              f"- Fallbacks: {fallbacks}", f"- cache_read per call: {cache_reads}", "",
-              "| id | Frage | Erwartet | Antwort | Auto-Flags | Ergebnis | Urteil (von Hand) |",
-              "|---|---|---|---|---|---|---|"]
+              f"- Fallbacks: {fallbacks}", f"- cache_read per call: {cache_reads}",
+              f"- tools per call: {tool_counts}", "",
+              "| id | Frage | Erwartet | Antwort | Auto-Flags | Tools | Ergebnis | Urteil (von Hand) |",
+              "|---|---|---|---|---|---|---|---|"]
     out.write_text("\n".join(header + rows) + "\n", encoding="utf-8")
     print(f"written: {out}")
     return 1 if fallbacks else 0

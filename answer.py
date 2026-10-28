@@ -124,8 +124,8 @@ def stream_answer(client, model, system, messages, cache=None):
                      {"type": "none"} if limited else None)
         streamed = False
         try:
-            # Not `yield from`: that swallows the generator's StopIteration, and with it
-            # the final message the sub-generator returns.
+            # Explicit loop so `streamed` is set only once a value arrives;
+            # the StopIteration carries the final message.
             while True:
                 event = next(call)
                 streamed = True
