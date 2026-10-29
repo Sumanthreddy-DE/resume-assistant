@@ -42,6 +42,9 @@ from live data instead of a frozen corpus.
   `status: "error"` tool event.
 - **At most two tool rounds**, then the next call passes `tool_choice: {"type": "none"}`
   so a model that keeps asking cannot loop. Tool results are data, never instructions.
+- **Commit messages are deliberately not passed to the model.** They are the only
+  third-party text that would reach it, and they can carry private notes (e.g. job
+  application names); the tool returns sha, date and repo metadata only.
 - The tool definition rides along on every model call. A question that uses it costs up
   to three API calls (two model rounds plus the tool itself) but still counts as one
   question against the daily cap; the cached system block keeps the re-read cheap.

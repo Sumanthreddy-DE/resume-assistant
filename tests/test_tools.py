@@ -15,7 +15,6 @@ SAMPLE = {
     "url": "https://github.com/Sumanthreddy-DE/simready",
     "last_commit_sha": "abc1234",
     "last_commit_date": "2026-09-14T10:00:00Z",
-    "last_commit_message": "feat: report writer",
 }
 
 
@@ -220,8 +219,8 @@ def test_fetch_repo_builds_both_urls_from_the_allowlist():
         ("https://api.github.com/repos/Sumanthreddy-DE/simready/commits?per_page=1", 5.0),
     ]
     assert data["last_commit_sha"] == "0123456"
-    assert data["last_commit_message"] == "fix: x"
     assert data["description"] == ""
+    assert not any("message" in key for key in data)
 
 
 def test_plain_answer_needs_one_call_and_no_tool_events():

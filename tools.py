@@ -58,7 +58,6 @@ def fetch_repo(repo, get=httpx.get):
         "url": info.get("html_url"),
         "last_commit_sha": commit["sha"][:7],
         "last_commit_date": commit["commit"]["committer"]["date"],
-        "last_commit_message": commit["commit"]["message"].splitlines()[0],
     }
 
 
