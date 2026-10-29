@@ -13,9 +13,9 @@ def case(case_id):
     return next(c for c in CASES if c["id"] == case_id)
 
 
-def test_nineteen_unique_cases():
-    assert len(CASES) == 19
-    assert len({c["id"] for c in CASES}) == 19
+def test_eighteen_unique_cases():
+    assert len(CASES) == 18
+    assert len({c["id"] for c in CASES}) == 18
 
 
 def test_negated_claim_is_not_flagged_but_a_false_one_is():
