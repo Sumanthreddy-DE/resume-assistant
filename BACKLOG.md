@@ -18,30 +18,13 @@ Living list of open issues, deferred work, and known caveats. Updated each sessi
 
 ## Open — S1 (blocker / broken demo)
 
-- **branch-divergence-main-vs-feat-repo-tool** (found 2026-10-29, resume-assistant session) —
-  `main` and `feat/repo-tool` both point at `6a5714b`, while each per-commit hook line
-  reported `3 ahead of origin` on `feat/repo-tool` only. Establish whether the tool
-  commits (`8fa3f0f`, `aaadb8d`, `5b70242`, `6a5714b`) are meant to land on `main` and
-  whether `origin/main` should carry them. Next action: `git -C <repo> log --oneline
-  origin/main -3` plus a decision on the intended integration path before any push.
+_(none)_
 
 ---
 
 ## Open — S2 (UX gap, polish, deferred decisions)
 
-- **eval-rerun-after-commit-message-removal** (found 2026-10-29, resume-assistant session) —
-  `evals/results/2026-10-28-claude-sonnet-5-prompt-v6.md` contains a `tool-pinn-en` answer
-  quoting *"updating the license references to Apache 2.0"*, which `6a5714b` makes
-  impossible to reproduce (commit messages no longer reach the model). Re-run the eval so
-  the result file matches the shipped tool. Next action: local uvicorn on 127.0.0.1:8100,
-  `evals/run_eval.py --url http://127.0.0.1:8100`, new dated result file.
-
-- **tool-simready-de-german-source-line** (found 2026-10-29, resume-assistant session) —
-  The German `tool-simready-de` answer ended with `Quelle: GitHub (live queried)` instead of
-  `live abgefragt`. Rule 17 carries the English value in parentheses and the model copied
-  it; no auto-flag catches a wrong-language source line. Next action: decide whether to
-  tighten rule 17's wording or add an auto-flag for a `queried` token in German answers,
-  then re-grade that row.
+_(none)_
 
 ---
 
@@ -59,6 +42,13 @@ _(items currently being worked — move from Open when started, back to Open if 
 
 ## Done this session (2026-10-29)
 
+- **branch-divergence-main-vs-feat-repo-tool** — resolved: `feat/repo-tool` fast-forwarded into
+  `main`, pushed and deployed on the VPS at `6a5714b`; live check (T4) passed 2026-10-29.
+- **tool-simready-de-german-source-line** — fixed deterministically in the site's client, not the
+  prompt: `assets/chat.js` `fixSourceLang()` (Sumanthreddy-DE.github.io `6b1a500`). The prompt
+  attempt `fb061b2` was reverted unevaluated (`4943e59`).
+- **eval-rerun-after-commit-message-removal** — won't do: the v6 result file stays the historical
+  record of what the model saw then; it is hand-graded 18/18 bestanden (`5e27d2d`).
 - **eval-runner-tool-recording** — `evals/run_eval.py` now collects tool events, adds the
   `expect_tool` field and the relative-time flag, plus a Tools column. `5b70242`
 - **eval-three-tool-cases** — `tool-simready-de`, `tool-pinn-en`, `tool-injection` added;
