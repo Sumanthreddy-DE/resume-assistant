@@ -24,33 +24,7 @@ _(none)_
 
 ## Open — S2 (UX gap, polish, deferred decisions)
 
-### corpus-and-fragen-stale-facts
-Found by the 2026-11-14 portfolio review (site repo plan
-`docs/exec-plans/active/2026-11-14-portfolio-review-fixes.md`, item E). The chat answers from
-`corpus.md`, which is identical here and in the site repo; both copies must change together,
-plus `fragen.html` in the site repo. Decisions by Sumanth on 2026-11-14:
-
-1. **Parts count:** the case study is right, the corpus is stale. `corpus.md:151`
-   "Trainiert auf 1.100 selbst generierten Bauteilen" → 2.272, matching
-   `projekte/simready.html:72`.
-2. **Positive-control eval case:** expected answer "1.100" → "2.272" in
-   `evals/questions.json` (id `positive-control`) and in the site's `fragen.html:162` table row.
-3. **Number of test questions:** Sumanth said "fünfzehn" is correct and `fragen.html` must
-   change. Conflict to settle first: `evals/questions.json` holds 18 cases and the published
-   table in `fragen.html` has 18 rows ("Alle 18 Testfragen", `fragen.html:172`), while
-   `automatisierung.html:63` says "fünfzehn". Count again with Sumanth before editing either.
-4. **FE programs prepared answer:** `fragen.html:119` says which FE programs he uses "steht
-   nicht in diesen Unterlagen". Replace with the tools the CV lists: Simufact Forming, deal.II,
-   MATLAB Simscape/Simulink, ParaView (FE/simulation, `profil.html:139`, `corpus.md:29,78`) and
-   Siemens NX, PTC Creo, SolidWorks (CAD, `corpus.md:79`). SolidWorks is a CAD tool, not an
-   FE program; word the answer so it does not claim otherwise.
-5. **SimReady section of corpus.md is older than the case study:** rewrite it from the current
-   `projekte/simready.html` (91 % F1 on 3.612 faces, 88/100 image-to-CAD with Qwen2.5-VL-3B
-   QLoRA (0/100 before fine-tuning), typed Pydantic DSL, 2.272 graphs split by source part).
-
-After the edits: run the eval (`evals/run_eval.py`), save the result under `evals/results/`,
-redeploy the backend on the VPS so the corpus cache refreshes, verify one live answer per
-changed fact, and update the eval table in `fragen.html` if any result changed.
+_(none yet)_
 
 ---
 
@@ -65,6 +39,10 @@ _(none yet)_
 _(items currently being worked — move from Open when started, back to Open if paused.)_
 
 ---
+
+## Done this session (2026-11-15)
+
+- **corpus-and-fragen-stale-facts** — done: corpus synced with the site (SimReady case study rewritten, 2.272 parts; PINN particle-reinforced) in `652b801`, `3bf0ee6`; positive control expects 2.272; FE-tools answer and 18-question count fixed on the site (`3f8bc1a`). Eval re-run live against `https://api.sumanthreddy.de`, hand-graded 18/18 (`c1b526a`, two check patterns fixed). The live chat answered 2.272 after the push.
 
 ## Done this session (2026-10-29)
 
