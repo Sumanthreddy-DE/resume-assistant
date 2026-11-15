@@ -27,8 +27,8 @@ def test_negated_claim_is_not_flagged_but_a_false_one_is():
 
 
 def test_positive_control_flags_a_missing_number():
-    assert auto_flags(case("positive-control"), "Etwa tausend Bauteile.") == ["fehlt: /1[.,]?100/"]
-    assert auto_flags(case("positive-control"), "1.100 Bauteile.") == []
+    assert auto_flags(case("positive-control"), "Etwa tausend Bauteile.") == ["fehlt: /2[.,]?272/"]
+    assert auto_flags(case("positive-control"), "2.272 Bauteile.") == []
 
 
 def test_md_cell_escapes_pipes_and_newlines():

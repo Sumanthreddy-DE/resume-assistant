@@ -126,31 +126,35 @@ Genau genug, um Versuchsreihen gezielt zu ersetzen statt sie vollständig zu fah
 
 - Zeitraum: seit 03/2026
 
-- Feld: FEA-Vorverarbeitung
+- Feld: FEA-Vorverarbeitung und CAD-Generierung
 
-- Technologien: PyTorch Geometric, pythonocc, LLM-Fine-Tuning, Streamlit
+- Technologien: PyTorch Geometric (GraphSAGE), pythonocc, Qwen2.5-VL (QLoRA), CadQuery, LLM-Agent und RAG, Streamlit
 
-Titel: SimReady – von der STEP-Datei zum vernetzungsfähigen Bauteil
+Titel: SimReady – KI-Copilot für FEA-Vorverarbeitung und CAD-Generierung
 
-Vor jeder FE-Rechnung steht die Vorverarbeitung: Geometrie prüfen, Modell bereinigen, entscheiden, wo das Netz verfeinert werden muss. Pro Bauteil kostet das erfahrene Berechnungsingenieure schnell mehrere Stunden. Was dabei übersehen wird, fällt erst im Solver auf – oder gar nicht.
+Vor jeder Finite-Elemente-Rechnung steht die Vorverarbeitung: Geometrie prüfen, das CAD-Modell reparieren und entscheiden, wo das Netz feiner sein muss. Pro Bauteil kostet das erfahrene Berechnungsingenieure oft mehrere Stunden. Was dabei übersehen wird, führt später im Solver zu Abbrüchen oder ungenauen Spannungen.
 
-### Zwölf Prüfungen und eine klare Aussage
+### Zwölf Geometrieprüfungen und automatische Heilung
 
-SimReady liest eine STEP-Datei ein und führt zwölf Geometrieprüfungen aus, unter anderem auf scharfe Kanten, Kleinstflächen und Lücken in der Topologie. Am Ende steht eine belastbare Aussage: vernetzungsfähig oder nicht.
+SimReady liest eine STEP-Datei über pythonocc (OpenCascade) ein, repariert Topologiefehler über ShapeFix und führt zwölf Geometrieprüfungen aus. Geprüft werden unter anderem offene Schalen, Selbstüberschneidungen, Splitterflächen (Sliver Faces), sehr kurze Kanten, dünne Wände sowie kleine Bohrungen und Verrundungen. Das Ergebnis ist ein Vernetzbarkeits-Score von 0 bis 100, eine geheilte STEP-Datei und eine farbliche Markierung an den betroffenen Flächen des 3D-Modells.
 
-Abbildung: Jeder Befund wird im Chat begründet und farbig am Modell markiert.
+### Das Graph Neural Network (BRepSAGE)
 
-Jeder Befund wird im Chat begründet, die betroffenen Flächen werden farbig direkt am 3D-Modell markiert. Der Unterschied zu einer Prüfliste ist die Begründung: man sieht nicht nur, dass etwas auffällt, sondern warum es für die Vernetzung relevant ist.
+SimReady übersetzt die B-Rep-Topologie in einen Flächen-Nachbarschaftsgraphen mit zwölf geometrischen Merkmalen pro Fläche (Flächentyp, Größe, Normalenvektor, mittlere Krümmung, UV-Ausdehnung). Darauf arbeitet BRepSAGE, ein zweischichtiges GraphSAGE-Netz mit drei Ausgabeköpfen: Verfeinerungsbedarf und lokale Komplexität pro Fläche sowie der Fehlertyp des gesamten Bauteils.
 
-### Das Graph Neural Network
+Trainiert auf 2.272 selbst generierten und gezielt degradierten CAD-Bauteilen, getrennt nach Ursprungsbauteil, ohne Datenleckage zwischen Training und Validierung.
 
-Der zweite Teil sagt voraus, welche CAD-Flächen eine Netzverfeinerung benötigen und welcher Fehlertyp vorliegt. Entscheidend ist der Kontext: jede Fläche wird zusammen mit ihren Nachbarflächen bewertet – so, wie ein erfahrener Berechnungsingenieur ein Bauteil als Ganzes liest, nicht Fläche für Fläche.
+Ergebnis auf 27 zurückgehaltenen Prüfbauteilen (3.612 Flächen): 91 % F1-Score (92 % Precision, 90 % Recall).
 
-Abbildung: Flächen mit vorhergesagtem Verfeinerungsbedarf.
+### LLM-Agent, RAG und Text-zu-CAD
 
-Trainiert auf 1.100 selbst generierten Bauteilen
+Über der Analyse liegt ein Multi-Turn-LLM-Copilot mit vier Werkzeugen: Geometrie analysieren, Reparaturen vorschlagen, FEA-Standards per Vektorsuche (RAG) nachschlagen und neue Bauteile erzeugen. Für die Erzeugung führt das System keinen freien LLM-Code aus, sondern nutzt eine typsichere Pydantic-DSL (Quader, Zylinder, Vereinigung, Abzug), die in valide STEP-Dateien übersetzt und sofort vom eigenen Geometrie-Checker geprüft wird (5 von 5 Prompts fehlerfrei auf gehosteten LLMs).
 
-Der Trainingsdatensatz ist selbst erzeugt, weil es keinen öffentlichen gibt, der Flächen nach Verfeinerungsbedarf annotiert. Das war der aufwendigste Teil des Projekts.
+### Vision-Language-Fine-Tuning (Bild zu CadQuery)
+
+Qwen2.5-VL-3B wurde per QLoRA auf dem GenCAD-Code-Datensatz feinabgestimmt, um aus einem 2D-Bauteilbild ausführbaren CadQuery-Code zu erzeugen. Auf dem 100-Teile-Testset stieg die Rate lauffähiger CAD-Programme von 0 auf 88 von 100 (Volumen-IoU im Mittel 0,563, Median 0,580).
+
+Jedes generierte Bauteil läuft anschließend durch den SimReady-Checker. Er erkennt Selbstüberschneidungen, zu dünne Wände und ungültige Solids, die eine reine Volumen-IoU-Metrik übersieht, zum Beispiel ein Bauteil mit IoU 0,83, das sich selbst durchdringt. In Arbeit: ein 150-Prompt-Text-zu-CAD-Benchmark für Konstruktionsregeln, mit dem Geometrie-Checker als Reward-Signal im Reinforcement Learning (GRPO).
 
 ## Fallstudie NX → Simscape
 
