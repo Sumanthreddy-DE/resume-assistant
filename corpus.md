@@ -47,10 +47,10 @@ Werkzeuge: ServiceNow, JavaScript, REST API, Jira
 
 ### Projekte
 
-#### PINN zur Parameteridentifikation in Verbundwerkstoffen (10/2025 – 02/2026, Masterarbeit)
+#### PINN zur Parameteridentifikation in partikelverstärkten Verbundwerkstoffen (10/2025 – 02/2026, Masterarbeit)
 Werkzeuge: PyTorch, Python, MATLAB, NumPy, SciPy, DeepONet, Surrogatmodelle
 Code: https://github.com/Sumanthreddy-DE/PINN-for-composite-interface-identification
-- Entwicklung eines physikinformierten neuronalen Netzes zur inversen Identifikation von Grenzflächenparametern in Verbundwerkstoffen aus effektiven Kompressions- und Schubmoduli
+- Entwicklung eines physikinformierten neuronalen Netzes zur inversen Identifikation von Grenzflächenparametern in partikelverstärkten Verbundwerkstoffen aus effektiven Kompressions- und Schubmoduli
 - Erprobung vorwärtsgerichteter Surrogatnetze und eines DeepONet, die das inverse Problem nicht lösten, vor der Wahl des PINN
 - Steigerung der Modellgenauigkeit durch Korrektur falsch annotierter Grenzfälle, adaptive Verlustgewichtung und Gradientenbegrenzung, Senkung des Vorhersagefehlers auf unter fünf Prozent
 
@@ -92,33 +92,33 @@ Deutsch – B2 (Zertifikat in Vorbereitung) · Englisch – C1 (fließend) · Hi
 
 - Zeitraum: 10/2025 – 02/2026
 
-- Feld: Faserverstärkte Verbundwerkstoffe
+- Feld: Partikelverstärkte Verbundwerkstoffe
 
-- Technologien: PyTorch, NumPy, SciPy
+- Technologien: PyTorch, PINN, DeepONet, Mori-Tanaka-Homogenisierung, NumPy, SciPy
 
-Titel: Inverse Parameteridentifikation an Faser-Matrix-Grenzflächen
+Titel: Grenzflächenparameter in Verbundwerkstoffen per PINN bestimmen
 
-In faserverstärkten Verbundwerkstoffen entscheidet die Interphase zwischen Faser und Matrix maßgeblich über das Bauteilverhalten. Ihre Parameter lassen sich messtechnisch kaum direkt erfassen. In der Praxis bedeutet das: aufwendige Versuchsreihen – oder Annahmewerte aus der Literatur.
+In partikelverstärkten Verbundwerkstoffen entscheidet die dünne Übergangszone (Interphase) zwischen Partikel und Matrix über die Lastübertragung und die effektive Bauteilsteifigkeit. In Finite-Elemente-Rechnungen ist diese Schicht teuer, weil extrem kleine Schichtdicken sehr feine Netze und schlecht konditionierte Steifigkeitsmatrizen erzwingen. Ein Null-Dicken-Grenzflächenmodell (Extended General Interface Model, EGIM) ersetzt die Schicht durch vier effektive Parameter, die sich jedoch weder direkt messen noch analytisch invertieren lassen.
 
-Abbildung: Die dreischichtige Interphase zwischen Faser und Matrix.
+### Der Ansatz: Mikromechanik in der Verlustfunktion
 
-### Der Ansatz
+Die analytischen Mori-Tanaka-Homogenisierungsgleichungen wurden von MATLAB nach Python und PyTorch überführt (gegen die Referenzimplementierung bis auf Maschinengenauigkeit von 10⁻¹⁴ verifiziert) und direkt in die Verlustfunktion eines inversen PINN eingebettet. Eingang sind die effektiven Kompressions- und Schubmoduli (K_eff, G_eff) eines dreischichtigen Interphasenmodells sowie die Phasenkennwerte; Ausgang sind die vier Grenzflächenparameter, die genau diese effektiven Moduli reproduzieren.
 
-Ich habe ein physikinformiertes neuronales Netz (PINN) entwickelt, das diese Parameter invers bestimmt. Eingang sind die effektiven Kompressions- und Schubmoduli eines dreischichtigen Interphasenmodells, Ausgang der Parametersatz, der genau diese Moduli reproduziert.
+Physikalische Schranken sind in der Ausgabeschicht verankert, damit das Netz nur zulässige Steifigkeiten und Grenzflächenpositionen vorhersagt. In jedem Trainingsschritt prüft das eingebettete Vorwärtsmodell, ob die vorhergesagten Parameter die Zielsteifigkeiten tatsächlich rekonstruieren.
 
-Die Mikromechanik der Homogenisierung steckt dabei in der Verlustfunktion selbst – das Netz lernt nicht nur aus Daten, sondern gegen die Physik. Damit bleibt die Lösung auch dort physikalisch sinnvoll, wo der Trainingsdatensatz dünn ist.
+### Was über die Genauigkeit im Training entschieden hat
 
-### Was über die Genauigkeit entschieden hat
+Drei Eingriffe: die Korrektur fehlerhaft annotierter Randfälle im Trainingsdatensatz, eine adaptive Verlustgewichtung nach dem ReLoBRaLo-Prinzip zwischen Daten- und Physikverlust sowie Gradientenbegrenzung gegen instabile Updates. Der erste Punkt war der größte Hebel, weil synthetische Platzhalterwerte an den Rändern des Parameterraums das Netz zuvor systematisch verzerrt hatten. Das beste Modell steht bei Epoche 323 von 500.
 
-Drei Eingriffe, in dieser Reihenfolge: die Korrektur falsch annotierter Randfälle im Trainingsdatensatz, adaptive Verlustgewichtung, und Gradientenbegrenzung gegen instabile Updates. Der erste Punkt war der größte Hebel – fehlerhafte Labels an den Rändern des Parameterraums haben das Modell systematisch in die falsche Richtung gezogen.
+### Modellvergleich und Validierung
 
-Abbildung: Konvergenz des inversen PINN über 500 Epochen. Physik- und Datenverlust laufen fast deckungsgleich, der Property-Verlust liegt vier Größenordnungen darunter; das beste Modell steht bei Epoche 323.
+Zum Vergleich wurde ein Branch-Trunk-DeepONet als differenzierbares Vorwärts-Surrogat trainiert (0,21 % mittlerer Vorwärtsfehler für K_eff, 0,36 % für G_eff) und mit einem Multi-Start-L-BFGS-Inversionssolver sowie globaler Differential-Evolution-Optimierung verglichen. Die iterative Inversion auf dem Surrogat bleibt bei extremen Steifigkeitsverhältnissen in lokalen Minima hängen; das direkte inverse PINN liefert die Parameter in einem einzigen Vorwärtsschritt.
 
-Abbildung: Vorhergesagte gegen referenzierte Grenzflächenparameter.
+Ergebnis, zwei getrennte Tests im partikelverstärkten Fall:
+- 500 zufällige Testkonfigurationen: Medianfehler 1,4 % für K_eff und 4,0 % für G_eff; K_eff wird genauer getroffen als G_eff.
+- Strukturierte Parameterstudie über Steifigkeitsverhältnis und Volumenanteil: 33 von 36 Konfigurationen unter der 5-%-Schwelle für K_eff und G_eff, außerhalb extrem weicher Partikel meist unter 2 %.
 
-Vorhersagefehler unter 5 %
-
-Genau genug, um Versuchsreihen gezielt zu ersetzen statt sie vollständig zu fahren. Das ist der eigentliche Nutzen: nicht der Ersatz des Labors, sondern die Entscheidung, welche Versuche sich noch lohnen.
+Genau genug, um aufwendige FE-Detailmodelle der Interphase in Parameterstudien durch das schnelle Grenzflächenmodell zu ersetzen.
 
 ## Fallstudie SimReady
 
