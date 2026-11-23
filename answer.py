@@ -8,6 +8,7 @@ from pathlib import Path
 import anthropic
 import httpx
 
+from limits import utc_today
 from tools import TOOLS, RepoCache, run_tool
 
 HERE = Path(__file__).resolve().parent
@@ -63,12 +64,21 @@ class CorpusCache:
         return self._text
 
 
-def build_system(corpus):
-    return [{
-        "type": "text",
-        "text": f"{SYSTEM_PROMPT}\n\n<quellen>\n{corpus}\n</quellen>",
-        "cache_control": {"type": "ephemeral"},
-    }]
+def build_system(corpus, today=None):
+    """Cached prompt + corpus, then today's date in its own uncached block.
+
+    The date goes after the cache breakpoint so a new day never invalidates the
+    cached prefix. Without it the model reads every listed period as current.
+    """
+    today = today or utc_today()
+    return [
+        {
+            "type": "text",
+            "text": f"{SYSTEM_PROMPT}\n\n<quellen>\n{corpus}\n</quellen>",
+            "cache_control": {"type": "ephemeral"},
+        },
+        {"type": "text", "text": f"<heute>{today:%d.%m.%Y} ({today:%m/%Y})</heute>"},
+    ]
 
 
 def model_options(model):

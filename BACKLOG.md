@@ -18,7 +18,7 @@ Living list of open issues, deferred work, and known caveats. Updated each sessi
 
 ## Open — S1 (blocker / broken demo)
 
-_(none)_
+- **date-aware-deploy-and-eval** — the bot read every finished period as current ("Right now he is working on his master's… running to August 2026", live, 2026-11-23): it had no date and rule 12 told it not to know one. Fixed on `fix/date-aware-answers`: today's date in an uncached system block after the corpus, rule 12 compares periods with it, three eval cases (`now-de`, `now-en`, `ended-role`). Open: merge, deploy to `/opt/resume-assistant`, run the 21-case eval live and hand-grade it. Corpus side (missing freelance entry, job status, generator drift) is filed in the site backlog as `chat-corpus-drift-and-job-status`. *(found 2026-11-23)*
 
 ---
 

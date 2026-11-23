@@ -1,3 +1,4 @@
+from datetime import date
 from types import SimpleNamespace
 
 import anthropic
@@ -99,11 +100,23 @@ def test_haiku_5_5_thinks_at_low_effort_with_room_for_thinking():
 
 
 def test_system_block_is_cached_and_holds_corpus():
-    system = answer.build_system("KORPUS-TEXT")
-    assert len(system) == 1
+    system = answer.build_system("KORPUS-TEXT", today=date(2026, 11, 23))
     assert system[0]["cache_control"] == {"type": "ephemeral"}
     assert "<quellen>\nKORPUS-TEXT\n</quellen>" in system[0]["text"]
     assert "Quelle:" in system[0]["text"] and "dritten Person" in system[0]["text"]
+
+
+def test_today_sits_in_an_uncached_block_after_the_corpus():
+    system = answer.build_system("K", today=date(2026, 11, 23))
+    assert len(system) == 2
+    assert "cache_control" not in system[1]
+    assert system[1]["text"] == "<heute>23.11.2026 (11/2026)</heute>"
+    assert "23.11.2026" not in system[0]["text"]  # the date never breaks the cached prefix
+
+
+def test_today_defaults_to_the_current_utc_date(monkeypatch):
+    monkeypatch.setattr(answer, "utc_today", lambda: date(2027, 1, 5))
+    assert answer.build_system("K")[1]["text"] == "<heute>05.01.2027 (01/2027)</heute>"
 
 
 def make_cache(tmp_path, fetch, clock=lambda: 0.0):

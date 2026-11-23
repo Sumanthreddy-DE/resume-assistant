@@ -13,9 +13,37 @@ def case(case_id):
     return next(c for c in CASES if c["id"] == case_id)
 
 
-def test_eighteen_unique_cases():
-    assert len(CASES) == 18
-    assert len({c["id"] for c in CASES}) == 18
+def test_twenty_one_unique_cases():
+    assert len(CASES) == 21
+    assert len({c["id"] for c in CASES}) == 21
+
+
+# The live answer of 2026-11-23 that read every finished period as current.
+STALE_NOW_EN = ("Right now, Sumanth is working on his master's degree in Computational Engineering at "
+                "Friedrich-Alexander-Universität Erlangen-Nürnberg, running from October 2022 to August 2026. "
+                "His most recent assignment is as a tutor at the Chair of Technical Dynamics, supporting "
+                "bachelor's students with MATLAB exercises, from September 2025 to August 2026. On the side, "
+                "he's been developing SimReady, a personal project since March 2026.")
+
+
+def test_now_en_flags_the_stale_answer_but_not_a_dated_one():
+    good = ("Right now he works on SimReady, his own project since 03/2026, and does freelance AI work. "
+            "He finished his master's in Computational Engineering at FAU in 08/2026, where he was also a tutor until then.")
+    assert auto_flags(case("now-en"), good) == []
+    assert any(f.startswith("verboten") for f in auto_flags(case("now-en"), STALE_NOW_EN))
+
+
+def test_now_de_flags_present_tense_study_but_not_finished_one():
+    good = ("Gerade arbeitet er an SimReady, seinem eigenen Projekt seit 03/2026. "
+            "Seinen Master hat er 08/2026 an der FAU abgeschlossen, dort war er bis dahin auch Tutor.")
+    bad = "Er studiert derzeit noch im Master an der FAU und ist aktuell Tutor. Nebenbei: SimReady."
+    assert auto_flags(case("now-de"), good) == []
+    assert any(f.startswith("verboten") for f in auto_flags(case("now-de"), bad))
+
+
+def test_ended_role_needs_the_end_date():
+    assert auto_flags(case("ended-role"), "Nein, Tutor war er bis 08/2026.") == []
+    assert any(f.startswith("verboten") for f in auto_flags(case("ended-role"), "Ja, er ist noch Tutor (09/2025 – 08/2026)."))
 
 
 def test_negated_claim_is_not_flagged_but_a_false_one_is():
