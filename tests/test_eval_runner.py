@@ -182,3 +182,44 @@ def test_bmw_negations_are_not_flagged():
     c = case("bmw")
     assert auto_flags(c, "Nein, er hat nie bei BMW gearbeitet.") == []
     assert auto_flags(c, "Nein, bei BMW war er nie angestellt.") == []
+
+
+# Live answers of 2026-11-24 that the first version of these checks let through.
+LIVE_NOW_DE = ("Daneben ist er seit 09/2025 als Tutor am Lehrstuhl für Technische Dynamik der FAU "
+               "Erlangen-Nürnberg tätig und betreut dort Bachelorstudierende. Diese Tätigkeit läuft bis 08/2026.")
+LIVE_NOW_EN = ("Two roles are still ongoing. Since 09/2025 he has been tutoring at the Chair of Technical Dynamics, "
+               "supporting bachelor students with MATLAB exercises.")
+LIVE_PHD = ("Nein. Er befindet sich derzeit im Master Computational Engineering an der FAU (10/2022 – 08/2026). "
+            "Eine Promotion ist nicht aufgeführt.")
+
+
+def test_live_date_failures_of_2026_11_24_are_flagged():
+    assert any(f.startswith("verboten") for f in auto_flags(case("now-de"), LIVE_NOW_DE))
+    assert any(f.startswith("verboten") for f in auto_flags(case("now-en"), LIVE_NOW_EN))
+    assert any(f.startswith("verboten") for f in auto_flags(case("phd"), LIVE_PHD))
+
+
+def test_phd_with_finished_master_is_not_flagged():
+    good = "Nein, promoviert hat er nicht. Seinen Master hat er 08/2026 an der FAU abgeschlossen."
+    assert auto_flags(case("phd"), good) == []
+
+
+def test_few_days_counts_as_relative_time_after_a_tool_call():
+    tools = [{"type": "tool", "repo": "simready", "status": "ok"}]
+    answer = "Der letzte Commit stammt vom 20. November 2026, also erst wenige Tage vor heute. Quelle: GitHub"
+    assert "relative Zeitangabe" in auto_flags(case("tool-simready-de"), answer, tools)
+
+
+def test_only_selects_cases_and_rejects_unknown_ids():
+    import pytest
+    assert [c["id"] for c in run_eval.select_cases(CASES, "now-en, phd")] == ["phd", "now-en"]
+    assert run_eval.select_cases(CASES, "") == CASES
+    with pytest.raises(SystemExit):
+        run_eval.select_cases(CASES, "nope")
+
+
+def test_free_path_never_overwrites_a_result(tmp_path):
+    (tmp_path / "2026-11-24-m.md").write_text("x", encoding="utf-8")
+    (tmp_path / "2026-11-24-m-2.md").write_text("x", encoding="utf-8")
+    assert run_eval.free_path(tmp_path, "2026-11-24-m").name == "2026-11-24-m-3.md"
+    assert run_eval.free_path(tmp_path, "2026-11-25-m").name == "2026-11-25-m.md"

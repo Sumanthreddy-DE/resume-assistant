@@ -141,3 +141,29 @@ def test_cache_refreshes_when_stale_and_ignores_empty(tmp_path):
     t["v"] = 3600
     cache.get()                 # stale again: fetch returns blank, old text kept
     assert cache.get() == "NEU"
+
+
+def test_periods_are_marked_finished_or_running_against_today():
+    corpus = ("#### Tutor (09/2025 – 08/2026, Erlangen)\n"
+              "#### SimReady (03/2026 – heute, Projekt)\n"
+              "#### Rolle (10/2026 – 12/2026)\n"
+              "- Zeitraum: 10/2025 – 02/2026\n"
+              "- Zeitraum: seit 03/2026\n"
+              "Bereich 2020 – 2022 ohne Monat bleibt.")
+    out = answer.annotate_periods(corpus, date(2026, 11, 23))
+    assert "(09/2025 – 08/2026 · abgeschlossen, Erlangen)" in out
+    assert "(03/2026 – heute · laufend, Projekt)" in out
+    assert "(10/2026 – 12/2026 · laufend)" in out
+    assert "Zeitraum: 10/2025 – 02/2026 · abgeschlossen\n" in out
+    assert "seit 03/2026 · laufend" in out
+    assert "2020 – 2022 ohne Monat bleibt." in out
+
+
+def test_a_period_ending_this_month_is_still_running():
+    assert answer.annotate_periods("(09/2025 – 11/2026)", date(2026, 11, 23)) == "(09/2025 – 11/2026 · laufend)"
+    assert answer.annotate_periods("(09/2025 – 10/2026)", date(2026, 11, 1)) == "(09/2025 – 10/2026 · abgeschlossen)"
+
+
+def test_build_system_annotates_the_cached_corpus():
+    system = answer.build_system("Tutor (09/2025 – 08/2026)", today=date(2026, 11, 23))
+    assert "Tutor (09/2025 – 08/2026 · abgeschlossen)" in system[0]["text"]

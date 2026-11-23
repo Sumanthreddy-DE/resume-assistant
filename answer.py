@@ -1,5 +1,6 @@
 """System prompt, corpus cache and the streamed Anthropic call."""
 import json
+import re
 import sys
 import threading
 import time
@@ -64,13 +65,36 @@ class CorpusCache:
         return self._text
 
 
+RANGE = re.compile(r"\b(\d{2})/(\d{4})\s*[–-]\s*(?:(\d{2})/(\d{4})|(heute))")
+SINCE = re.compile(r"\bseit (\d{2})/(\d{4})")
+
+
+def annotate_periods(corpus, today):
+    """Mark every MM/YYYY period as finished or running, computed here, not by the model.
+
+    The live eval of 2026-11-24 showed the model still calls a period that ended in
+    08/2026 current even with today's date in the prompt. A period ending this month
+    counts as running. The text changes only when a period crosses today, so the
+    cached prefix stays warm.
+    """
+    now = (today.year, today.month)
+
+    def mark(match):
+        running = match.group(5) is not None or (int(match.group(4)), int(match.group(3))) >= now
+        return f"{match.group(0)} · {'laufend' if running else 'abgeschlossen'}"
+
+    corpus = RANGE.sub(mark, corpus)
+    return SINCE.sub(lambda m: f"{m.group(0)} · laufend", corpus)
+
+
 def build_system(corpus, today=None):
-    """Cached prompt + corpus, then today's date in its own uncached block.
+    """Cached prompt + annotated corpus, then today's date in its own uncached block.
 
     The date goes after the cache breakpoint so a new day never invalidates the
-    cached prefix. Without it the model reads every listed period as current.
+    cached prefix.
     """
     today = today or utc_today()
+    corpus = annotate_periods(corpus, today)
     return [
         {
             "type": "text",

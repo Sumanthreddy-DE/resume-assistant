@@ -19,6 +19,7 @@ import httpx
 HERE = Path(__file__).resolve().parent
 RELATIVE_TIME = re.compile(
     r"(?i)vor \d+ (Tag|Woche|Monat|Jahr)|läuft noch|\b\d+ (days|weeks|months) ago\b"
+    r"|(wenige|ein paar|einigen) (Tage|Wochen|Monate)|\ba few (days|weeks|months)\b"
 )
 
 
@@ -61,6 +62,24 @@ def md_cell(text):
     return text.strip().replace("|", "\\|").replace("\r\n", "\n").replace("\n", "<br>")
 
 
+def select_cases(cases, only):
+    if not only:
+        return cases
+    wanted = [i.strip() for i in only.split(",") if i.strip()]
+    unknown = set(wanted) - {c["id"] for c in cases}
+    if unknown:
+        raise SystemExit(f"unknown case ids: {', '.join(sorted(unknown))}")
+    return [c for c in cases if c["id"] in wanted]
+
+
+def free_path(folder, stem):
+    """Never overwrite an earlier result: a result file is a historical record."""
+    path, n = folder / f"{stem}.md", 2
+    while path.exists():
+        path, n = folder / f"{stem}-{n}.md", n + 1
+    return path
+
+
 def run_case(client, url, case, pause):
     history = list(case.get("history", []))
     for setup_question in case.get("setup", []):
@@ -82,9 +101,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", required=True)
     parser.add_argument("--pause", type=float, default=62.0)
+    parser.add_argument("--only", default="", help="comma-separated case ids; default: all")
     args = parser.parse_args()
     url = args.url.rstrip("/")
-    cases = json.loads((HERE / "questions.json").read_text(encoding="utf-8"))
+    cases = select_cases(json.loads((HERE / "questions.json").read_text(encoding="utf-8")), args.only)
     rows, models, fallbacks, cache_reads, tool_counts = [], set(), 0, [], []
     with httpx.Client(timeout=60.0) as client:
         for i, case in enumerate(cases):
@@ -108,7 +128,9 @@ def main():
             if i + 1 < len(cases):
                 time.sleep(args.pause)
     label = "-".join(sorted(models)) or "no-model"
-    out = HERE / "results" / f"{date.today().isoformat()}-{label}.md"
+    if args.only:
+        label += "-subset"
+    out = free_path(HERE / "results", f"{date.today().isoformat()}-{label}")
     header = ["# Eval run", "", f"- URL: {url}", f"- Models seen: {', '.join(sorted(models)) or 'none'}",
               f"- Fallbacks: {fallbacks}", f"- cache_read per call: {cache_reads}",
               f"- tools per call: {tool_counts}", "",
