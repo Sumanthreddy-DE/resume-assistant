@@ -19,6 +19,7 @@ Living list of open issues, deferred work, and known caveats. Updated each sessi
 ## Open — S1 (blocker / broken demo)
 
 - **date-aware-deploy-and-eval** — the bot read every finished period as current ("Right now he is working on his master's… running to August 2026", live, 2026-11-23): it had no date and rule 12 told it not to know one. Fixed on `fix/date-aware-answers`: today's date in an uncached system block after the corpus, rule 12 compares periods with it, three eval cases (`now-de`, `now-en`, `ended-role`). Open: merge, deploy to `/opt/resume-assistant`, run the 21-case eval live and hand-grade it. Corpus side (missing freelance entry, job status, generator drift) is filed in the site backlog as `chat-corpus-drift-and-job-status`. *(found 2026-11-23)*
+- **question-log-switch-on** — opt-in question log built (`questionlog.py`, `LOG_QUESTIONS`, default off; text only, emails and phones redacted, date + follow-up flag, 90-day retention, `StateDirectory=` in the unit). Switch on only after the site's Datenschutz page describes it (site backlog `recruiter-questions-and-case-studies`): install the new unit file, add `LOG_QUESTIONS=true` to `/etc/resume-assistant/env`, restart, ask one question, check `/var/lib/resume-assistant/questions/`. Then review the log weekly and turn unanswered questions into corpus facts and eval cases. *(found 2026-11-23)*
 
 ---
 

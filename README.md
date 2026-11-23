@@ -65,8 +65,12 @@ switch `BOT_ENABLED`.
 
 ## Privacy
 
-No questions, answers or IP addresses are logged or stored (uvicorn runs with
-`--no-access-log`, Caddy has no access log configured). Conversation history lives
+No answers or IP addresses are logged or stored (uvicorn runs with
+`--no-access-log`, Caddy has no access log configured). Question text is logged only
+when `LOG_QUESTIONS=true` ([`questionlog.py`](questionlog.py)): the question with emails
+and phone numbers redacted, the UTC date and a follow-up flag, one JSONL file per day
+under `/var/lib/resume-assistant/questions/`, deleted after 90 days. Default is off; it
+is switched on only after the site's Datenschutz page says so. Conversation history lives
 only in the visitor's open page. IP addresses are held in memory for at most ten
 minutes for rate limiting and never written anywhere.
 

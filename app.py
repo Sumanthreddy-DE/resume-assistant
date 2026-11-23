@@ -11,6 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from answer import CorpusCache, build_system, stream_answer
 from limits import DailyCap, TokenBucket
+from questionlog import QuestionLog
 from tools import RepoCache
 
 MAX_BODY = 16 * 1024
@@ -28,6 +29,7 @@ class Settings:
     daily_cap: int = 200
     allowed_origins: list = field(default_factory=lambda: [SITE_ORIGIN, CUSTOM_ORIGIN])
     debug_ip: bool = False
+    log_questions: bool = False
 
     @classmethod
     def from_env(cls, env=os.environ):
@@ -39,6 +41,7 @@ class Settings:
             daily_cap=int(env.get("DAILY_CAP", "200")),
             allowed_origins=[o.strip() for o in env.get("ALLOWED_ORIGIN", DEFAULT_ORIGINS).split(",") if o.strip()],
             debug_ip=flag("DEBUG_IP", "false"),
+            log_questions=flag("LOG_QUESTIONS", "false"),
         )
 
 
@@ -104,7 +107,7 @@ def stream(events):
     return StreamingResponse(ndjson(events), media_type="application/x-ndjson", headers=STREAM_HEADERS)
 
 
-def create_app(settings, streamer, corpus, bucket=None, cap=None):
+def create_app(settings, streamer, corpus, bucket=None, cap=None, qlog=None):
     bucket = bucket or TokenBucket()
     cap = cap or DailyCap(settings.daily_cap)
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
@@ -136,6 +139,8 @@ def create_app(settings, streamer, corpus, bucket=None, cap=None):
             return stream([{"type": "fallback", "reason": "rate"}])
         if not cap.allow():
             return stream([{"type": "fallback", "reason": "cap"}])
+        if qlog is not None:
+            qlog.record(messages[-1]["content"], followup=len(messages) > 1)
         return stream(streamer(build_system(corpus.get()), messages))
 
     return app
@@ -153,4 +158,5 @@ def get_app():
     def streamer(system, messages):
         return stream_answer(client, settings.model, system, messages, cache=repos)
 
-    return create_app(settings, streamer, corpus)
+    qlog = QuestionLog() if settings.log_questions else None
+    return create_app(settings, streamer, corpus, qlog=qlog)

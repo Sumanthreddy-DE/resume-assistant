@@ -142,3 +142,34 @@ def test_debug_ip_on_health():
     client, _ = make(settings=Settings(debug_ip=True))
     r = client.get("/health", headers={"X-Forwarded-For": "9.9.9.9, 2.2.2.2"})
     assert r.json() == {"ok": True, "ip": "2.2.2.2"}
+
+
+class SpyLog:
+    def __init__(self):
+        self.records = []
+
+    def record(self, question, followup):
+        self.records.append((question, followup))
+
+
+def test_question_log_gets_the_stripped_question_and_followup_flag():
+    log = SpyLog()
+    client = TestClient(create_app(Settings(), lambda s, m: iter(DONE), StubCorpus(), qlog=log))
+    client.post("/chat", json={"question": "  Frage?  ", "history": []})
+    client.post("/chat", json={"question": "Und?", "history": turns(2)})
+    assert log.records == [("Frage?", False), ("Und?", True)]
+
+
+def test_no_question_log_by_default_and_flag_reads_env():
+    assert Settings().log_questions is False
+    assert Settings.from_env({"LOG_QUESTIONS": "true"}).log_questions is True
+    assert Settings.from_env({}).log_questions is False
+
+
+def test_rejected_questions_are_not_logged():
+    log = SpyLog()
+    off = Settings(bot_enabled=False)
+    client = TestClient(create_app(off, lambda s, m: iter(DONE), StubCorpus(), qlog=log))
+    client.post("/chat", json={"question": "Frage?", "history": []})
+    client.post("/chat", json={"question": "x" * 501, "history": []})
+    assert log.records == []
