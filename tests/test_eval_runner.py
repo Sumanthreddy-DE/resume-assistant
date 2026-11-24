@@ -231,3 +231,8 @@ def test_answers_over_sixty_words_are_flagged_source_line_excluded():
     long = " ".join(["wort"] * 61) + "\n\nQuelle: Lebenslauf"
     assert auto_flags(c, ok) == []
     assert auto_flags(c, long) == ["61 Wörter (> 60)"]
+
+
+def test_siemens_en_accepts_collaborated():
+    answer = "No, Siemens was not his employer. He collaborated with Siemens on the NX tool at FAU."
+    assert auto_flags(case("siemens-en"), answer) == []
