@@ -17,6 +17,7 @@ from pathlib import Path
 import httpx
 
 HERE = Path(__file__).resolve().parent
+MAX_WORDS = 60
 RELATIVE_TIME = re.compile(
     r"(?i)vor \d+ (Tag|Woche|Monat|Jahr)|läuft noch|\b\d+ (days|weeks|months) ago\b"
     r"|(wenige|ein paar|einigen) (Tage|Wochen|Monate)|\ba few (days|weeks|months)\b"
@@ -51,7 +52,17 @@ def auto_flags(case, answer, tools=()):
         flags.append(f"Tool unerwartet aufgerufen: {repos}")
     if tools and RELATIVE_TIME.search(answer):
         flags.append("relative Zeitangabe")
+    words = word_count(answer)
+    if words > MAX_WORDS:
+        flags.append(f"{words} Wörter (> {MAX_WORDS})")
     return flags
+
+
+def word_count(answer):
+    """Words in the answer body; the source line does not count (rule 10)."""
+    body = [line for line in answer.strip().splitlines()
+            if not re.match(r"\s*(Quelle|Source):", line)]
+    return len(" ".join(body).split())
 
 
 def format_tools(tools):

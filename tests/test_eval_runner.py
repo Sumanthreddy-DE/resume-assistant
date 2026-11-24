@@ -223,3 +223,11 @@ def test_free_path_never_overwrites_a_result(tmp_path):
     (tmp_path / "2026-11-24-m-2.md").write_text("x", encoding="utf-8")
     assert run_eval.free_path(tmp_path, "2026-11-24-m").name == "2026-11-24-m-3.md"
     assert run_eval.free_path(tmp_path, "2026-11-25-m").name == "2026-11-25-m.md"
+
+
+def test_answers_over_sixty_words_are_flagged_source_line_excluded():
+    c = {"id": "x", "must_match": [], "must_not_match": []}
+    ok = " ".join(["wort"] * 60) + "\n\nQuelle: Lebenslauf, Fallstudie PINN, Fallstudie SimReady"
+    long = " ".join(["wort"] * 61) + "\n\nQuelle: Lebenslauf"
+    assert auto_flags(c, ok) == []
+    assert auto_flags(c, long) == ["61 Wörter (> 60)"]
