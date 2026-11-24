@@ -105,15 +105,16 @@ def build_system(corpus, today=None):
     ]
 
 
+THINKING_MAX_TOKENS = 2000
+
+
 def model_options(model):
-    # Sonnet 5 thinks adaptively unless told otherwise. Haiku 4.5 does not think by
-    # default and rejects `effort`, so it gets nothing extra. Haiku 5.5 always thinks
-    # adaptively and its thinking counts toward max_tokens: low effort, more room.
+    # Haiku 4.5 does not think by default and rejects `effort`, so it gets nothing extra.
+    # Sonnet 5 and Haiku 5.5 think adaptively by default; thinking stays on (Sumanth,
+    # 2026-11-24) at low effort, and because it counts toward max_tokens they get more room.
     options = {"max_tokens": MAX_TOKENS}
-    if model.startswith("claude-sonnet-5"):
-        options["thinking"] = {"type": "disabled"}
-    elif model.startswith("claude-haiku-5-5"):
-        options.update(output_config={"effort": "low"}, max_tokens=2000)
+    if model.startswith(("claude-sonnet-5", "claude-haiku-5-5")):
+        options.update(output_config={"effort": "low"}, max_tokens=THINKING_MAX_TOKENS)
     return options
 
 

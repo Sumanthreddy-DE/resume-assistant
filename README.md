@@ -58,7 +58,7 @@ Results: [`evals/results/`](evals/results/).
 
 ## Cost and abuse controls
 
-`max_tokens` 600 per round · question ≤ 500 characters · body ≤ 16 KiB · 6 turns of
+`max_tokens` 600 per round (2000 for Sonnet 5 and Haiku 5.5, whose adaptive thinking at low effort counts toward it) · question ≤ 500 characters · body ≤ 16 KiB · 6 turns of
 history · 10 questions per 10 minutes per IP · global daily cap (a tool question makes up
 to 3 API calls but still counts as one) · a dedicated API key with a spend limit · kill
 switch `BOT_ENABLED`.

@@ -85,8 +85,12 @@ def test_model_options_per_model():
     _, haiku = run(FakeStream(["x"]), model="claude-haiku-4-5")
     _, sonnet = run(FakeStream(["x"]), model="claude-sonnet-5")
     assert "thinking" not in haiku.calls[0] and "output_config" not in haiku.calls[0]
-    assert sonnet.calls[0]["thinking"] == {"type": "disabled"}
     assert haiku.calls[0]["max_tokens"] == 600
+    # Sonnet 5 keeps adaptive thinking on (Sumanth, 2026-11-24): no switch, low effort,
+    # room for thinking inside max_tokens.
+    assert "thinking" not in sonnet.calls[0]
+    assert sonnet.calls[0]["output_config"] == {"effort": "low"}
+    assert sonnet.calls[0]["max_tokens"] == 2000
 
 
 def test_haiku_5_5_thinks_at_low_effort_with_room_for_thinking():
