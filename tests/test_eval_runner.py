@@ -27,15 +27,15 @@ STALE_NOW_EN = ("Right now, Sumanth is working on his master's degree in Computa
 
 
 def test_now_en_flags_the_stale_answer_but_not_a_dated_one():
-    good = ("Right now he works on SimReady, his own project since 03/2026, and does freelance AI work. "
-            "He finished his master's in Computational Engineering at FAU in 08/2026, where he was also a tutor until then.")
+    good = ("He finished his master's in 08/2026 and is now looking for a full-time job. Meanwhile he keeps "
+            "building SimReady and practises German every day.")
     assert auto_flags(case("now-en"), good) == []
     assert any(f.startswith("verboten") for f in auto_flags(case("now-en"), STALE_NOW_EN))
 
 
 def test_now_de_flags_present_tense_study_but_not_finished_one():
-    good = ("Gerade arbeitet er an SimReady, seinem eigenen Projekt seit 03/2026. "
-            "Seinen Master hat er 08/2026 an der FAU abgeschlossen, dort war er bis dahin auch Tutor.")
+    good = ("Seinen Master hat er 08/2026 abgeschlossen, jetzt sucht er eine Festanstellung. "
+            "Bis dahin baut er SimReady weiter aus und übt täglich Deutsch.")
     bad = "Er studiert derzeit noch im Master an der FAU und ist aktuell Tutor. Nebenbei: SimReady."
     assert auto_flags(case("now-de"), good) == []
     assert any(f.startswith("verboten") for f in auto_flags(case("now-de"), bad))
@@ -236,3 +236,12 @@ def test_answers_over_sixty_words_are_flagged_source_line_excluded():
 def test_siemens_en_accepts_collaborated():
     answer = "No, Siemens was not his employer. He collaborated with Siemens on the NX tool at FAU."
     assert auto_flags(case("siemens-en"), answer) == []
+
+
+def test_now_answers_must_name_the_job_search_and_german():
+    """The 2026-11-26 live answer listed SimReady and ended roles, but no job search."""
+    live = ("Right now his main ongoing work is SimReady, a project he's been building since 03/2026: an AI "
+            "copilot that checks CAD files for simulation-readiness. His FAU teaching and research roles, and "
+            "the PINN master's thesis, have all since ended.")
+    flags = auto_flags(case("now-en"), live)
+    assert any("full-time" in f for f in flags) and any("German" in f for f in flags)
