@@ -245,3 +245,20 @@ def test_now_answers_must_name_the_job_search_and_german():
             "the PINN master's thesis, have all since ended.")
     flags = auto_flags(case("now-en"), live)
     assert any("full-time" in f for f in flags) and any("German" in f for f in flags)
+
+
+# Live answers of 2026-11-26: job search right, daily German practice missing. The old
+# checks passed them because "deutschsprachigen" and "German-language" matched.
+LIVE_NOW_DE_1126 = ("Er hat sein Masterstudium im August 2026 abgeschlossen und sucht derzeit eine Festanstellung. "
+                    "Nebenbei arbeitet er freiberuflich an KI- und Automatisierungslösungen – etwa einem Buchungs-Bot "
+                    "und einem deutschsprachigen KI-Telefonassistenten – und entwickelt weiter an SimReady.")
+LIVE_NOW_EN_1126 = ("He has finished his master's degree (08/2026) and is currently looking for a full-time position. "
+                    "Alongside that, he's building a Python/Playwright booking bot and a German-language AI phone "
+                    "assistant for local businesses. He's also still actively developing SimReady.")
+
+
+def test_now_checks_need_german_practice_not_just_the_word_german():
+    assert any("Deutsch" in f for f in auto_flags(case("now-de"), LIVE_NOW_DE_1126))
+    assert any("German" in f for f in auto_flags(case("now-en"), LIVE_NOW_EN_1126))
+    assert auto_flags(case("now-de"), LIVE_NOW_DE_1126 + " Außerdem übt er täglich Deutsch im Gespräch mit einer KI.") == []
+    assert auto_flags(case("now-en"), LIVE_NOW_EN_1126 + " He also practises German with an AI every day.") == []
