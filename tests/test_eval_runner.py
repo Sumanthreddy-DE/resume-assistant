@@ -262,3 +262,11 @@ def test_now_checks_need_german_practice_not_just_the_word_german():
     assert any("German" in f for f in auto_flags(case("now-en"), LIVE_NOW_EN_1126))
     assert auto_flags(case("now-de"), LIVE_NOW_DE_1126 + " Außerdem übt er täglich Deutsch im Gespräch mit einer KI.") == []
     assert auto_flags(case("now-en"), LIVE_NOW_EN_1126 + " He also practises German with an AI every day.") == []
+
+
+def test_german_check_allows_english_c1_in_the_next_clause():
+    """Live answer of 2026-11-26 run 2 was right but flagged: English C1 shared a sentence with Deutsch."""
+    live = ("Sein Deutsch liegt auf B2-Niveau (Zertifikat in Vorbereitung), Englisch spricht er fließend auf C1. "
+            "Er übt derzeit täglich 15 Minuten Deutsch im Gespräch mit einer KI.")
+    assert auto_flags(case("german"), live) == []
+    assert any(f.startswith("verboten") for f in auto_flags(case("german"), "Sein Deutsch ist auf C1-Niveau."))
