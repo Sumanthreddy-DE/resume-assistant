@@ -17,6 +17,9 @@ from pathlib import Path
 import httpx
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent))
+from sourceline import MARKERS, question_language  # noqa: E402
+
 MAX_WORDS = 60
 RELATIVE_TIME = re.compile(
     r"(?i)vor \d+ (Tag|Woche|Monat|Jahr)|läuft noch|\b\d+ (days|weeks|months) ago\b"
@@ -52,6 +55,10 @@ def auto_flags(case, answer, tools=()):
         flags.append(f"Tool unerwartet aufgerufen: {repos}")
     if tools and RELATIVE_TIME.search(answer):
         flags.append("relative Zeitangabe")
+    lang = question_language(case.get("question", ""))
+    wrong = [m for code, m in MARKERS.items() if code != lang]
+    if lang and any(re.match(rf"\s*{m}", line) for m in wrong for line in answer.splitlines()):
+        flags.append(f"Quellenzeile nicht {MARKERS[lang]}")
     words = word_count(answer)
     if words > MAX_WORDS:
         flags.append(f"{words} Wörter (> {MAX_WORDS})")

@@ -270,3 +270,8 @@ def test_german_check_allows_english_c1_in_the_next_clause():
             "Er übt derzeit täglich 15 Minuten Deutsch im Gespräch mit einer KI.")
     assert auto_flags(case("german"), live) == []
     assert any(f.startswith("verboten") for f in auto_flags(case("german"), "Sein Deutsch ist auf C1-Niveau."))
+
+
+def test_source_line_in_the_wrong_language_is_flagged():
+    assert "Quellenzeile nicht Source:" in auto_flags(case("now-en"), "He looks for a job, builds SimReady, practises German daily.\n\nQuelle: Lebenslauf")
+    assert not any(f.startswith("Quellenzeile") for f in auto_flags(case("now-de"), "Er sucht eine Festanstellung.\n\nQuelle: Lebenslauf"))
