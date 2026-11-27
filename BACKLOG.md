@@ -44,7 +44,7 @@ _(items currently being worked — move from Open when started, back to Open if 
 ## Done this session (2026-11-27)
 
 - **date-aware-deploy-and-eval** — done: `annotate_periods` marks every period finished or running, rule 12 obeys it, thinking on at low effort, 60-word rule; graded runs 2026-11-24 (0 date failures), 2026-11-26 ×2, 2026-11-27 (17 OK, 4 partial, 0 FAIL). Colleague-tone rules 2, 13, 14 (`e461864`); source line rewritten to the question's language in the stream (`sourceline.py`, `9c5906e`).
-- **rerun-now-currentwork** — done: `now-de`, `now-en`, `start-de` all OK with the Aktuell line (`evals/results/2026-11-27-claude-sonnet-5-subset-3.md`); `now-en` pattern accepts "job-hunting".
+- **rerun-now-currentwork** — done: `now-de`, `now-en`, `start-de` all OK with the Aktuell line (`evals/results/2026-11-27-claude-sonnet-5-subset-3.md`); `now-en` pattern accepts "job-hunting". Second sample at 19:46 (`subset-4`): 2 OK, 1 partial; `now-en` used the Aktuell line correctly but dropped daily German practice, so that omission is intermittent.
 - **question-log-switch-on** — done: Datenschutz text live on `impressum.html#datenschutz` and matches `questionlog.py`; new unit with `StateDirectory=` installed, `LOG_QUESTIONS=true`, restarted; a test question landed in `2026-11-27.jsonl`. Weekly review: `question-log-review`.
 
 ## Done this session (2026-11-15)
