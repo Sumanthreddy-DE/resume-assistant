@@ -275,3 +275,11 @@ def test_german_check_allows_english_c1_in_the_next_clause():
 def test_source_line_in_the_wrong_language_is_flagged():
     assert "Quellenzeile nicht Source:" in auto_flags(case("now-en"), "He looks for a job, builds SimReady, practises German daily.\n\nQuelle: Lebenslauf")
     assert not any(f.startswith("Quellenzeile") for f in auto_flags(case("now-de"), "Er sucht eine Festanstellung.\n\nQuelle: Lebenslauf"))
+
+
+def test_now_en_accepts_job_hunting():
+    """Live 2026-11-27 subset-3: a correct answer said "job-hunting" and was flagged."""
+    live = ("He has finished his master's degree and is currently job-hunting for roles in engineering-focused "
+            "machine learning. He keeps developing SimReady and practices German for 15 minutes a day.\n\nSource: Lebenslauf")
+    assert auto_flags(case("now-en"), live) == []
+    assert any(f.startswith("fehlt") for f in auto_flags(case("now-en"), live.replace("job-hunting for", "open to")))
