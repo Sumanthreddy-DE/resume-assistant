@@ -200,9 +200,9 @@ Für Fragen wie „Arbeitet er noch an SimReady?“ gibt es ein einziges, nur le
 
 Ein fester Satz von 29 Testfragen läuft nach jeder Prompt-Änderung gegen den Live-Server, und ich bewerte jede Antwort von Hand. Die Fragen enthalten Fallen: Siemens war Kooperationspartner und nie Arbeitgeber, PTC Creo ein Werkzeug und kein Arbeitgeber, Prompt-Injection über den Gesprächsverlauf, beendete Tätigkeiten, die nicht als laufend erscheinen dürfen, und eine Positivkontrolle. Automatische Muster markieren Auffälligkeiten nur vor; das Urteil fällt von Hand.
 
-Letzter vollständiger Lauf (21 Fragen, 27.11.2026): 16 bestanden, 4 teilweise, 0 falsch, 1 wegen eines Messfehlers wiederholt und bestanden
+Letzter vollständiger Lauf (29 Fragen, 27.11.2026): 24 bestanden, 4 teilweise, 1 nicht bestanden
 
-„Teilweise“ heißt hier meist: richtig, aber ein Detail fehlt, etwa die tägliche Deutschpraxis bei „Was macht er gerade?“.
+„Teilweise“ heißt hier meist: inhaltlich richtig, aber länger als die erlaubten 60 Wörter oder ohne ein erwartetes Detail. Nicht bestanden hat eine englische Frage, die der Assistent auf Deutsch beantwortet hat.
 
 ### Betrieb auf dem eigenen Server
 
