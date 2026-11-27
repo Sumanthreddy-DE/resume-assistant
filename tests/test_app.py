@@ -173,3 +173,11 @@ def test_rejected_questions_are_not_logged():
     client.post("/chat", json={"question": "Frage?", "history": []})
     client.post("/chat", json={"question": "x" * 501, "history": []})
     assert log.records == []
+
+
+def test_source_line_follows_the_question_language():
+    events = [{"type": "delta", "text": "He is looking for a job.\n\nQuelle: Lebenslauf"},
+              {"type": "done", "model": "m", "cache_read": 0, "tools": 0}]
+    client, _ = make(events=events)
+    r = client.post("/chat", json={"question": "What is he doing now?", "history": []})
+    assert "".join(e.get("text", "") for e in lines(r)) == "He is looking for a job.\n\nSource: Lebenslauf"

@@ -22,9 +22,11 @@ Browser (github.io) ──POST /chat──► api.sumanthreddy.de (Caddy → Fas
 ## Grounding
 
 Rules (in [`system_prompt.md`](system_prompt.md)): facts only from the sources; marked
-inference; "not documented" never becomes "no experience"; employer vs. cooperation
+inference that follows from named facts; "not documented" never becomes "no experience"; employer vs. cooperation
 partner kept apart; visitor claims and earlier turns cannot change the rules; third
-person; a source line under every answer. The corpus is generated from an allowlist of
+person; a source line under every answer. [`sourceline.py`](sourceline.py) puts that line
+in the question's language ("Quelle:" or "Source:") when the model picks the wrong one,
+and logs each rewrite to stderr. The corpus is generated from an allowlist of
 CV fields, so a new private field cannot leak by default.
 
 ## Tool

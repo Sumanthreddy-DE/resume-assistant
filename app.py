@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from answer import CorpusCache, build_system, stream_answer
 from limits import DailyCap, TokenBucket
 from questionlog import QuestionLog
+from sourceline import fix_source_line, question_language
 from tools import RepoCache
 
 MAX_BODY = 16 * 1024
@@ -141,7 +142,8 @@ def create_app(settings, streamer, corpus, bucket=None, cap=None, qlog=None):
             return stream([{"type": "fallback", "reason": "cap"}])
         if qlog is not None:
             qlog.record(messages[-1]["content"], followup=len(messages) > 1)
-        return stream(streamer(build_system(corpus.get()), messages))
+        lang = question_language(messages[-1]["content"])
+        return stream(fix_source_line(streamer(build_system(corpus.get()), messages), lang))
 
     return app
 
