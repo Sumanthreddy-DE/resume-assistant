@@ -12,6 +12,7 @@
 - Website: sumanthreddy.de (https://sumanthreddy.de)
 - Verfügbarkeit: sofort verfügbar
 - Status: Studium abgeschlossen (Master 08/2026), sucht eine Festanstellung; übt täglich 15 Minuten Deutsch im Gespräch mit einer KI
+- Aktuell: Neben der Stellensuche freiberuflich: ein Buchungs-Bot, der seit 04/2026 jeden Morgen läuft, und ein KI-Telefonassistent für lokale Betriebe in Entwicklung; dazu Weiterentwicklung von SimReady
 - Zielrollen (in dieser Reihenfolge): Machine Learning Engineer für Engineering · Simulationsingenieur · Maschinenbauingenieur (FEM, CAD)
 - Stärkstes Projekt: SimReady, weil es Maschinenbau und KI in einem funktionierenden Werkzeug verbindet: STEP-Geometrie prüfen, für die Simulation heilen und die Befunde mit einem LLM-Agenten erklären; die Masterarbeit zu physikinformierten neuronalen Netzen (PINNs) zeigt dazu die wissenschaftliche Tiefe.
 - Umzug: Umzugsbereit (deutschlandweit)
