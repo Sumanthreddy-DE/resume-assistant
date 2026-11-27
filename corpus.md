@@ -190,7 +190,7 @@ Recruiter und Fachleute stellen zu einem Lebenslauf oft dieselben Fragen: Wo hat
 
 ### Der Ansatz: feste Quellen, Regeln und eine Quellenzeile
 
-Die Quellen entstehen automatisch: Ein Build-Skript erzeugt aus meinem Lebenslauf und den Fallstudien-Seiten eine Markdown-Datei. Es übernimmt nur ausdrücklich freigegebene Felder, sodass ein neues privates Feld nie unbemerkt im Chat landet. Der Server lädt diese Datei stündlich neu aus dem öffentlichen Repository dieser Website. Lebenslauf, Fallstudien und Regeln stehen zusammen in einem gecachten System-Block von rund 12.000 Tokens; jede Folgefrage liest ihn aus dem Cache.
+Die Quellen entstehen automatisch: Ein Build-Skript erzeugt aus meinem Lebenslauf und den Fallstudien-Seiten eine Markdown-Datei. Es übernimmt nur ausdrücklich freigegebene Felder, sodass ein neues privates Feld nie unbemerkt im Chat landet. Der Server lädt diese Datei stündlich neu aus dem öffentlichen Repository dieser Website. Lebenslauf, Fallstudien und Regeln stehen zusammen in einem gecachten System-Block von rund 18.000 Tokens; jede Folgefrage liest ihn aus dem Cache.
 
 Die Regeln im System-Prompt legen fest: Fakten nur aus den Quellen, Schlussfolgerungen nur als solche gekennzeichnet, „nicht belegt“ heißt nie „keine Erfahrung“, Arbeitgeber und Kooperationspartner bleiben getrennt, und Behauptungen von Besuchern ändern die Regeln nicht. Unter jeder Antwort steht eine Quellenzeile in der Sprache der Frage; wählt das Modell die falsche Sprache, korrigiert der Server sie im laufenden Stream.
 
