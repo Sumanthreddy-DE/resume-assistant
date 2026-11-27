@@ -14,8 +14,8 @@ def case(case_id):
 
 
 def test_twenty_one_unique_cases():
-    assert len(CASES) == 21
-    assert len({c["id"] for c in CASES}) == 21
+    assert len(CASES) == 29
+    assert len({c["id"] for c in CASES}) == 29
 
 
 # The live answer of 2026-11-23 that read every finished period as current.
