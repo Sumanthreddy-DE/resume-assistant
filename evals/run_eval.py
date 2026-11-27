@@ -112,7 +112,9 @@ def run_case_safely(client, url, case, pause):
     try:
         return run_case(client, url, case, pause)
     except httpx.HTTPError as exc:
-        return "", {"type": "fallback", "reason": f"harness: {type(exc).__name__}"}, []
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        detail = f"{type(exc).__name__} {status}" if status else type(exc).__name__
+        return "", {"type": "fallback", "reason": f"harness: {detail}"}, []
 
 
 def main():
