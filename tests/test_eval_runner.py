@@ -72,7 +72,7 @@ def test_siemens_en_negations_are_not_flagged():
 
 def test_frontend_hedge_is_not_flagged_but_verdict_is():
     c = case("frontend")
-    hedge = "Frontend-Arbeit ist nicht dokumentiert; es liegt keine Erfahrung in den Quellen vor."
+    hedge = "JavaScript hat er bei TCS genutzt; reine Frontend-Arbeit ist nicht dokumentiert, es liegt keine Erfahrung in den Quellen vor."
     verdict = "Frontend steht nicht in den Quellen, er hat keine Erfahrung damit."
     assert auto_flags(c, hedge) == []
     assert any(f.startswith("verboten") for f in auto_flags(c, verdict))
@@ -283,3 +283,11 @@ def test_now_en_accepts_job_hunting():
             "machine learning. He keeps developing SimReady and practices German for 15 minutes a day.\n\nSource: Lebenslauf")
     assert auto_flags(case("now-en"), live) == []
     assert any(f.startswith("fehlt") for f in auto_flags(case("now-en"), live.replace("job-hunting for", "open to")))
+
+
+def test_pinn_accuracy_accepts_prozent_and_frontend_needs_javascript():
+    """Live 2026-11-27 run 2: "unter 5 Prozent" was flagged; the frontend answer missed JavaScript at TCS."""
+    assert auto_flags(case("pinn-accuracy"), "Der Fehler lag unter 5 Prozent.") == []
+    assert auto_flags(case("pinn-accuracy"), "Der Fehler war klein.") != []
+    missed = "Frontend ist nicht sein Schwerpunkt; bei SimReady nutzt er Streamlit."
+    assert any(f.startswith("fehlt") for f in auto_flags(case("frontend"), missed))
