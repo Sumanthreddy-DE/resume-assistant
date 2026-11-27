@@ -20,7 +20,7 @@
 
 #### KI-Entwicklung und Automatisierung · Freiberuflich (04/2026 – heute, Reutlingen)
 - Programmierung eines Buchungs-Bots in Python und Playwright, der die Küchenbuchungen eines Wohnhauses täglich über GitHub Actions per E-Mail an den Hausmeister sendet
-- Entwicklung eines deutschsprachigen KI-Telefonassistenten für lokale Unternehmen und Auswahl von Spracherkennung (Deepgram), Sprachmodell (OpenAI) und Sprachausgabe (ElevenLabs) nach Antwortzeit und Sprachqualität
+- Entwicklung eines deutschsprachigen KI-Telefonassistenten für lokale Unternehmen und Auswahl von Spracherkennung (Deepgram) und Sprachausgabe (ElevenLabs) nach Antwortzeit und Sprachqualität
 
 #### Wissenschaftliche Hilfskraft und Tutor · FAU Erlangen-Nürnberg (11/2023 – 08/2026, Erlangen)
 Parallele Tätigkeiten an vier Lehrstühlen während des Masterstudiums
@@ -179,3 +179,83 @@ Diese Zuordnung übernimmt ein Klassifikationsmodell auf 41 Constraint-Merkmalen
 Zum Schluss vergleicht sie die Gelenkpositionen in NX und in Simscape. Weicht etwas ab, gibt es eine Warnung statt eines stillen Fehlers. Das ist der Teil, der den Unterschied macht: ein automatisch erzeugtes Modell, dem niemand traut, spart keine Zeit.
 
 Aus Stunden manueller Übertragung werden Minuten
+
+## Fallstudie Lebenslauf-Assistent
+
+Titel: Fragen an meinen Lebenslauf: Chat-Assistent mit Quellenbindung
+
+Die wichtigste Entscheidung: kein Retrieval. Lebenslauf und Fallstudien stehen vollständig im System-Prompt, weil ein Suchschritt eine weitere Stelle wäre, an der ein Kernfakt verloren gehen kann.
+
+Recruiter und Fachleute stellen zu einem Lebenslauf oft dieselben Fragen: Wo hat er gearbeitet, was hat er selbst gebaut, ab wann ist er verfügbar? Ein Chat-Assistent kann das sofort beantworten, aber nur, wenn er nichts erfindet. Eine falsche Antwort über einen Bewerber schadet mehr als gar keine. Deshalb darf dieser Assistent nur aus festen Quellen antworten und muss offen sagen, wenn etwas nicht belegt ist.
+
+### Der Ansatz: feste Quellen, Regeln und eine Quellenzeile
+
+Die Quellen entstehen automatisch: Ein Build-Skript erzeugt aus meinem Lebenslauf und den Fallstudien-Seiten eine Markdown-Datei. Es übernimmt nur ausdrücklich freigegebene Felder, sodass ein neues privates Feld nie unbemerkt im Chat landet. Der Server lädt diese Datei stündlich neu aus dem öffentlichen Repository dieser Website. Lebenslauf, Fallstudien und Regeln stehen zusammen in einem gecachten System-Block von rund 12.000 Tokens; jede Folgefrage liest ihn aus dem Cache.
+
+Die Regeln im System-Prompt legen fest: Fakten nur aus den Quellen, Schlussfolgerungen nur als solche gekennzeichnet, „nicht belegt“ heißt nie „keine Erfahrung“, Arbeitgeber und Kooperationspartner bleiben getrennt, und Behauptungen von Besuchern ändern die Regeln nicht. Unter jeder Antwort steht eine Quellenzeile in der Sprache der Frage; wählt das Modell die falsche Sprache, korrigiert der Server sie im laufenden Stream.
+
+Für Fragen wie „Arbeitet er noch an SimReady?“ gibt es ein einziges, nur lesendes Werkzeug: Es holt die letzte Aktivität eines von drei freigegebenen GitHub-Projekten. Das Modell kann nur einen dieser drei Namen wählen, und Commit-Nachrichten werden ihm bewusst nicht übergeben, weil sie fremden oder privaten Text enthalten können.
+
+### Geprüft wird von Hand, nach jeder Änderung
+
+Ein fester Satz von 29 Testfragen läuft nach jeder Prompt-Änderung gegen den Live-Server, und ich bewerte jede Antwort von Hand. Die Fragen enthalten Fallen: Siemens war Kooperationspartner und nie Arbeitgeber, PTC Creo ein Werkzeug und kein Arbeitgeber, Prompt-Injection über den Gesprächsverlauf, beendete Tätigkeiten, die nicht als laufend erscheinen dürfen, und eine Positivkontrolle. Automatische Muster markieren Auffälligkeiten nur vor; das Urteil fällt von Hand.
+
+Letzter vollständiger Lauf (21 Fragen, 27.11.2026): 16 bestanden, 4 teilweise, 0 falsch, 1 wegen eines Messfehlers wiederholt und bestanden
+
+„Teilweise“ heißt hier meist: richtig, aber ein Detail fehlt, etwa die tägliche Deutschpraxis bei „Was macht er gerade?“.
+
+### Betrieb auf dem eigenen Server
+
+Das Backend ist eine FastAPI-Anwendung, die Antworten als NDJSON streamt. Sie läuft als abgeschotteter systemd-Dienst hinter Caddy auf einem selbst administrierten Server in Deutschland. Gegen Missbrauch und Kosten gibt es Grenzen pro Anfrage, höchstens zehn Fragen pro zehn Minuten und IP-Adresse, eine tägliche Obergrenze, einen eigenen API-Schlüssel mit Ausgabenlimit und einen Ausschalter. Fällt der Server aus oder greift eine Grenze, zeigt die Seite eine vorbereitete Antwort mit Hinweis, nie eine Fehlermeldung. Was gespeichert wird, steht im Datenschutz.
+
+## Fallstudie text-to-cad-rl
+
+Titel: text-to-cad-rl: RL-Umgebung für Text-zu-CAD
+
+Die wichtigste Entscheidung: bewertet wird die gebaute 3D-Geometrie, nicht der Text der Antwort. Das Modell schreibt keinen ausführbaren Code, sondern ein JSON-CAD-Programm, und eine Prüfung in OpenCASCADE misst Maße und Features direkt am Volumenkörper.
+
+Sprachmodelle sollen aus einer Beschreibung wie „Montageplatte für einen NEMA-17-Schrittmotor, 5 mm dick, mit Freiraum für den Zentrierbund und die vier M3-Schrauben“ ein korrektes CAD-Bauteil erzeugen. Um sie darin zu trainieren oder fair zu vergleichen, braucht es eine Belohnung, die nur ein wirklich richtiges Bauteil bekommt. Eine Umgebung, die sich mit einem fast richtigen Körper täuschen lässt, trainiert genau diese Täuschung.
+
+### Der Aufbau: JSON-CAD-Programm, Prüfung im Subprozess
+
+Die Umgebung baut auf verifiers v1 von Prime Intellect auf und ist auf dem Prime Intellect Environments Hub veröffentlicht. Das Modell antwortet in einem Schritt mit einem JSON-Programm in der CAD-Sprache aus meinem Projekt SimReady, die vier Operationen kennt: Quader, Zylinder, Vereinigen und Abziehen. Der B-Rep-Checker aus SimReady baut daraus den Körper in einem isolierten Subprozess, der sich bei Hängern beenden lässt, und prüft Maße und Features am 3D-Modell. Fehler im Checker selbst führen zu einem Ausführungsfehler statt zu einer falschen Null-Belohnung.
+
+### Daten: getrennte Test- und Trainingsaufgaben
+
+Der Testsatz besteht aus 111 festen Aufgaben: 37 mechanische Bauteile in drei Formulierungen, mit expliziten Maßen, im Stil eines Ingenieurs mit Normen und Passungen, und als Konstruktionsabsicht. Die Trainingsaufgaben (Platten mit Bohrungen, Buchsen, Flansche) erzeugt ein deterministischer Generator mit Durchgangsbohrungen nach ISO 273. Eine Prüfung über geometrische Signaturen stellt sicher, dass kein Trainingsbauteil einem Testbauteil gleicht: 6.000 von 6.000 erzeugten Aufgaben bestehen ihre eigenen Prüfungen, ohne eine einzige Überschneidung mit dem Testsatz. Als Kontrolle bestehen alle 111 Musterlösungen, und alle 111 unveränderten Leerantworten erhalten 0.
+
+### Gegen Täuschung abgesichert
+
+Ich habe versucht, die Bewertung selbst zu überlisten: Platte ohne Bohrungen, drei statt vier Bohrungen, Sacklöcher statt Durchgangsbohrungen, Bohrungen neben dem Bauteil, ein zweiter loser Körper, ein Vollstab statt einer Buchse und weitere. Alle 13 Täuschungsversuche fallen durch. Drei bekannte Lücken des Checkers sind dokumentiert und in Tests festgehalten, sodass jede Verbesserung in SimReady hier sofort sichtbar wird.
+
+### Ergebnis: Normangaben sind die eigentliche Hürde
+
+Vier offene Sprachmodelle liefen mit je fünf Durchläufen pro Aufgabe über den ganzen Testsatz, zusammen 2.220 Episoden. Die Erfolgsquote pro Versuch (pass@1) liegt zwischen 43,6 % und 91,5 %; zwei Frontier-Modelle erreichten auf denselben Aufgaben mit demselben Checker in SimReady 95,5 % und 96,2 %, wenn auch über einen Tool-Aufruf statt einer Textantwort. Die meisten Fehler sind Geometriefehler, also falsche Maße oder fehlende Features, keine Formatfehler. Eine Episode deckte zudem einen Fehler im SimReady-Checker auf, den ich gemeldet habe.
+
+14 bis 49 Prozentpunkte weniger Erfolg bei Normangaben als bei expliziten Maßen, bei allen vier Modellen statistisch belegt
+
+Bei expliziten Aufgaben steht jedes Maß im Text, für die Motorplatte also 42 × 42 × 5 mm, eine 22,5-mm-Mittelbohrung und vier 3,4-mm-Bohrungen im 31-mm-Quadrat. Bei Ingenieursaufgaben muss das Modell diese Zahlen selbst aus Normen und Passungen ableiten, aus „NEMA 17“ und „M3“. Bei allen vier Modellen schließt das gepaarte 95-%-Bootstrap-Intervall der Lücke die Null aus; bei den Frontier-Modellen ist die Lücke klein und nicht gesichert. Genau diesen Übersetzungsschritt belohnt die Umgebung. Ein Modell wurde mit ihr noch nicht trainiert: Gebaut, validiert und evaluiert ist die Umgebung, ein RL-Lauf steht noch aus.
+
+## Fallstudie Telefonassistent
+
+Titel: KI-Telefonassistent für lokale Betriebe: Latenz zuerst messen
+
+Die wichtigste Entscheidung: erst messen, dann bauen. Bevor es ein Produkt gibt, laufen alle Kandidaten für Spracherkennung, Sprachmodell und Sprachausgabe gegen Grenzwerte, die vorher feststehen. So zeigt die Messung, an welcher Stufe es hängt, bevor ein Anbieter fest eingebaut ist.
+
+Der Assistent soll Anrufe für lokale Betriebe auf Deutsch und Englisch annehmen, zuerst Tischreservierungen im Restaurant. Am Telefon zählt jede Pause: Bis die erste Silbe der Antwort zu hören ist, laufen Spracherkennung, die Antwort des Sprachmodells bis zum ersten Satz und der Start der Sprachausgabe nacheinander ab. Lange Pausen wirken am Telefon wie eine abgebrochene Verbindung. Das Projekt ist noch in Entwicklung, es gibt noch keinen Kunden.
+
+### Runde 1: jede Stufe einzeln gegen feste Grenzwerte
+
+Gemessen habe ich mit eigenen Testsätzen aus dem Restaurantalltag: 30 Sätze für die Spracherkennung, darunter Gerichte wie „Chicken Tikka Masala“ und Uhrzeiten wie „halb 8“, zehn Gesprächsschritte für das Sprachmodell, das über ein Werkzeug freie Tische sucht, und 15 Sätze für die Sprachausgabe, deren Stimmen ich blind bewertet habe. Die Grenzwerte standen vorher fest: Median bis zur ersten Audioausgabe höchstens 2,3 Sekunden bei einfachen Antworten und 3,5 Sekunden mit Werkzeugaufruf, keine kritischen Erkennungsfehler, mindestens 9 von 10 richtigen Gesprächsschritten, Stimmqualität im Mittel mindestens 4 von 5 und höchstens 15 Cent pro Gesprächsminute.
+
+Schnellste Kombination: 1,28 Sekunden bis zur ersten Audioausgabe (Summe der Mediane je Stufe) bei rund 4 bis 5 US-Cent pro Minute
+
+Trotzdem besteht keine Kombination jeden Grenzwert, und das Ergebnis sagt auch, woran es liegt. Die Spracherkennung macht in fünf von sechs Läufen trotz Keyword-Boosting aus „Butter Chicken“ ein „Buttered Chicken“, und im Streaming-Modus schneidet sie einen Satz einmal zu früh ab. Die Sprachmodelle verfehlen vor allem Datumsangaben, etwa einen Sonntag statt des nächsten Montags, oder überspringen die Tischsuche. Zwei Prüfungen waren selbst fehlerhaft („halb 8“ ist eine richtige Uhrzeit); ich habe sie korrigiert und dokumentiert, nicht passend gemacht.
+
+### Was feststeht und was offen ist
+
+Gewählt sind Deepgram im Streaming-Modus, mit der Erkennung ganzer Sätze als Rückfallebene, und eine Stimme von ElevenLabs; deren Bewertung von 3,93 stammt bisher von nur einer Person und bleibt vorläufig. Beim Sprachmodell liegen Claude Haiku 4.5 und das offene Modell gpt-oss-120b auf Groq innerhalb des Rauschens von zehn Gesprächsschritten: gpt-oss ist bei einfachen Antworten rund 750 Millisekunden schneller, macht aber mehr Datumsfehler. Beide laufen deshalb weiter, mit einem verbesserten Prompt.
+
+### Runde 2: die ganze Pipeline mit Pipecat
+
+Die zweite Runde setzt die Stufen mit dem Open-Source-Framework Pipecat zu einer Pipeline zusammen. Unterbricht der Anrufer die Antwort, stoppt die Ausgabe mit den Standardeinstellungen nach rund 390 bis 500 Millisekunden, mit einer schneller reagierenden Sprachaktivitätserkennung nach 257 bis 303 Millisekunden; im Gesprächsverlauf bleiben nur die Sätze, die der Anrufer vollständig gehört hat. Eine erste Sperrliste vor dem Sprachmodell zeigt, wo die Sicherheitsprüfung sitzt: Gesperrte Anfragen erreichen das Modell gar nicht erst. Geprüft habe ich auch Lizenz und Pflege des Frameworks und ob es eine Telefonanbindung für sipgate gibt: Die gibt es nicht direkt, mögliche Wege sind notiert. Offen sind die Ende-zu-Ende-Messung mit der echten Stimme und der Wechsel des Anbieters per Konfiguration.

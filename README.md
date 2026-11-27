@@ -2,7 +2,7 @@
 
 The backend behind "Fragen an meinen Lebenslauf" on
 [sumanthreddy-de.github.io/fragen.html](https://sumanthreddy-de.github.io/fragen.html):
-a question-answering assistant that may only use my CV and three case studies.
+a question-answering assistant that may only use my CV and six case studies.
 
 ## Architecture
 
