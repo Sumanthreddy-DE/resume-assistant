@@ -181,3 +181,21 @@ def test_source_line_follows_the_question_language():
     client, _ = make(events=events)
     r = client.post("/chat", json={"question": "What is he doing now?", "history": []})
     assert "".join(e.get("text", "") for e in lines(r)) == "He is looking for a job.\n\nSource: Lebenslauf"
+
+
+def test_english_question_gets_an_answer_language_hint():
+    client, seen = make()
+    client.post("/chat", json={"question": "When could he start?", "history": turns(2)})
+    _, messages = seen[0]
+    assert messages[:2] == turns(2)
+    assert messages[-1] == {"role": "user", "content": [
+        {"type": "text", "text": "When could he start?"},
+        {"type": "text", "text": "(Answer in English.)"}]}
+
+
+def test_german_question_gets_a_german_hint_and_unclear_gets_none():
+    client, seen = make()
+    client.post("/chat", json={"question": "Ab wann kann er anfangen?", "history": []})
+    client.post("/chat", json={"question": "Hallo", "history": []})
+    assert seen[0][1][-1]["content"][1] == {"type": "text", "text": "(Antworte auf Deutsch.)"}
+    assert seen[1][1] == [{"role": "user", "content": "Hallo"}]

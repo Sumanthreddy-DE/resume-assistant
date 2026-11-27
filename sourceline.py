@@ -21,6 +21,7 @@ EN_WORDS = {"he", "did", "does", "is", "was", "what", "how", "when", "which", "t
             "his", "with", "can", "work", "worked", "still", "now", "doing", "a", "an", "of", "for",
             "or", "in", "on", "to", "him", "any"}
 WORD = re.compile(r"[a-zäöüß]+")
+HINTS = {"de": "(Antworte auf Deutsch.)", "en": "(Answer in English.)"}
 
 
 def question_language(question):
@@ -32,6 +33,20 @@ def question_language(question):
     if de == en:
         return None
     return "de" if de > en else "en"
+
+
+def with_language_hint(messages, lang):
+    """Append a one-line answer-language hint to the last user turn.
+
+    Rule 10 alone lost against the German system block: "When could he start?" got a
+    German answer in the 2026-11-27 full run. The hint sits next to the question, outside
+    the cached system block. Unclear language: messages come back unchanged.
+    """
+    if lang is None:
+        return messages
+    *head, last = messages
+    content = [{"type": "text", "text": last["content"]}, {"type": "text", "text": HINTS[lang]}]
+    return [*head, {**last, "content": content}]
 
 
 def _rewrite(line, lang):
