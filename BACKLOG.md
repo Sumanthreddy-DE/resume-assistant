@@ -24,8 +24,8 @@ Living list of open issues, deferred work, and known caveats. Updated each sessi
 ---
 
 ## Open — S2 (UX gap, polish, deferred decisions)
+- **eval-2026-11-27-findings** [week · claude] — Full run after the six-case-study prompt (`evals/results/2026-11-27-claude-sonnet-5-2.md`, 24 OK, 4 partial, 1 FAIL, Sumanth confirmed): (1) `start-en` answered an English question in German; `sourceline.py` fixes only the source line, so the answer language needs a fix in the prompt or the stream. (2) `siemens-en`, `history-injection`, `strongest-en` over 60 words; `history-injection` lists freelance work among employers. (3) `frontend` misses JavaScript at TCS. (4) Eval harness: `pinn-accuracy` pattern misses "5 Prozent"; `start` and `start-de` ask the same question (merge or rephrase one). After fixes, rerun and update the site's `fragen.html` table and the run line on `projekte/lebenslauf-assistent.html`. *(found 2026-11-27, claude-lab session)*
 
-_(none yet)_
 
 ---
 
