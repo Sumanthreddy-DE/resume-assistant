@@ -11,7 +11,10 @@
 - GitHub: github.com/Sumanthreddy-DE (https://github.com/Sumanthreddy-DE)
 - Website: sumanthreddy.de (https://sumanthreddy.de)
 - Verfügbarkeit: sofort verfügbar
-- Status: Studium abgeschlossen (Master 08/2026), sucht eine Festanstellung
+- Status: Studium abgeschlossen (Master 08/2026), sucht eine Festanstellung; übt täglich 15 Minuten Deutsch im Gespräch mit einer KI
+- Zielrollen (in dieser Reihenfolge): Machine Learning Engineer für Engineering · Simulationsingenieur · Maschinenbauingenieur (FEM, CAD)
+- Stärkstes Projekt: SimReady, weil es Maschinenbau und KI in einem funktionierenden Werkzeug verbindet: STEP-Geometrie prüfen, für die Simulation heilen und die Befunde mit einem LLM-Agenten erklären; die Masterarbeit zu physikinformierten neuronalen Netzen (PINNs) zeigt dazu die wissenschaftliche Tiefe.
+- Umzug: Umzugsbereit (deutschlandweit)
 
 ### Berufserfahrung
 
@@ -88,7 +91,6 @@ Code: https://github.com/Sumanthreddy-DE/Peak-Power-Minimization
 
 ### Sprachen
 Deutsch – B2 (Zertifikat in Vorbereitung) · Englisch – C1 (fließend) · Hindi – fließend · Telugu – Muttersprache
-Übt täglich 15 Minuten Deutsch im Gespräch mit einer KI
 
 ### Engagement
 - Mitgründer der Studierendenorganisation TEA an der FAU zur Begleitung internationaler Studierender beim Studienstart
