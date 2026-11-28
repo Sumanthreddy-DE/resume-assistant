@@ -21,6 +21,7 @@ EN_WORDS = {"he", "did", "does", "is", "was", "what", "how", "when", "which", "t
             "his", "with", "can", "work", "worked", "still", "now", "doing", "a", "an", "of", "for",
             "or", "in", "on", "to", "him", "any"}
 WORD = re.compile(r"[a-zäöüß]+")
+NAMES = {"CV": "Lebenslauf"}  # wrong source name -> rule-11 name
 HINTS = {"de": "(Antworte auf Deutsch.)", "en": "(Answer in English.)"}
 
 
@@ -49,16 +50,30 @@ def with_language_hint(messages, lang):
     return [*head, {**last, "content": content}]
 
 
+def _rename_sources(body):
+    """Source names stay German in both languages (rule 11); the model sometimes writes "CV"."""
+    out = []
+    for name in body.split(","):
+        key = name.strip()
+        if key in NAMES:
+            print(f"source name rewritten: {key} -> {NAMES[key]}", file=sys.stderr)
+            name = name.replace(key, NAMES[key])
+        out.append(name)
+    return ",".join(out)
+
+
 def _rewrite(line, lang):
     stripped = line.lstrip()
     lead = line[:len(line) - len(stripped)]
     for marker_lang, marker in MARKERS.items():
-        if stripped.startswith(marker) and marker_lang != lang:
-            body = stripped[len(marker):]
+        if not stripped.startswith(marker):
+            continue
+        body = _rename_sources(stripped[len(marker):])
+        if marker_lang != lang:
             for de, en in PHRASES:
                 body = body.replace(en, de) if lang == "de" else body.replace(de, en)
             print(f"source line rewritten: {marker} -> {MARKERS[lang]}", file=sys.stderr)
-            return lead + MARKERS[lang] + body
+        return lead + MARKERS[lang] + body
     return line
 
 

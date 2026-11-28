@@ -57,3 +57,15 @@ def test_held_text_flushes_before_a_tool_or_fallback_event():
 def test_unknown_language_passes_everything_through():
     raw = deltas("Hi.\n\nQuelle: Lebenslauf")
     assert list(fix_source_line(raw, None)) == raw
+
+
+def test_cv_source_name_becomes_lebenslauf(capsys):
+    # Live 2026-11-28: roles-en and start-en ended with "Source: CV" (not a rule-11 name).
+    events = list(fix_source_line(deltas("He is available.\n\nSource: C", "V, Fallstudie SimReady"), "en"))
+    assert text(events) == "He is available.\n\nSource: Lebenslauf, Fallstudie SimReady"
+    assert "CV -> Lebenslauf" in capsys.readouterr().err
+
+
+def test_cv_in_the_answer_body_is_left_alone():
+    events = list(fix_source_line(deltas("His CV lists Python.\n\nSource: Lebenslauf"), "en"))
+    assert text(events) == "His CV lists Python.\n\nSource: Lebenslauf"
