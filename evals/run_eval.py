@@ -33,6 +33,14 @@ DOC_MENTION = re.compile(
     r"|according to (his )?(CV|r[eé]sum[eé]|profile|documents)|\bhis (CV|r[eé]sum[eé]) (says|states|lists|shows)"
 )
 EMAIL = "sumanthreddy.settipalli@gmail.com"
+# Rule 11 and 17: the only names a source line may carry (both languages).
+SOURCE_NAMES = {
+    "Lebenslauf", "Fallstudie PINN", "Fallstudie SimReady", "Fallstudie NX → Simscape",
+    "Fallstudie Lebenslauf-Assistent", "Fallstudie text-to-cad-rl", "Fallstudie Telefonassistent",
+    "GitHub (live abgefragt)", "GitHub (live queried)",
+    "keine – steht nicht in den Unterlagen", "none – not in the documents",
+}
+SOURCE_LINE = re.compile(r"^\s*(?:Quelle|Source):(.*)$", re.M)
 
 
 def ask(client, url, question, history):
@@ -67,6 +75,8 @@ def auto_flags(case, answer, tools=()):
     wrong = [m for code, m in MARKERS.items() if code != lang]
     if lang and any(re.match(rf"\s*{m}", line) for m in wrong for line in answer.splitlines()):
         flags.append(f"Quellenzeile nicht {MARKERS[lang]}")
+    for body in SOURCE_LINE.findall(answer):
+        flags += [f"Quellenname: {n}" for n in (x.strip() for x in body.split(",")) if n and n not in SOURCE_NAMES]
     if DOC_MENTION.search(answer):
         flags.append("nennt das Dokument")
     if EMAIL in answer and not case.get("expect_email"):

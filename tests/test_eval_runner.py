@@ -326,3 +326,20 @@ def test_email_pointer_flagged_only_where_no_gap_is_expected():
     assert "E-Mail-Verweis ohne Lücke" not in auto_flags(case("salary"), "Steht nicht in den Quellen. " + MAIL)
     assert "E-Mail fehlt" in auto_flags(case("salary"), "Dazu steht nichts in den Quellen.")
     assert [c["id"] for c in CASES if c.get("expect_email")] == ["python-years", "salary"]
+
+
+def test_source_names_outside_rule_11_are_flagged():
+    c = {"id": "x", "must_match": [], "must_not_match": []}
+    assert auto_flags(c, "He wants ML roles.\n\nSource: CV") == ["Quellenname: CV"]
+    for line in ["Quelle: Lebenslauf, Fallstudie SimReady", "Source: Lebenslauf, Fallstudie NX → Simscape",
+                 "Quelle: GitHub (live abgefragt)", "Source: none – not in the documents",
+                 "Quelle: keine – steht nicht in den Unterlagen"]:
+        assert auto_flags(c, "Antwort.\n\n" + line) == [], line
+
+
+def test_every_allowed_source_name_is_in_the_prompt_or_the_rewrite():
+    from sourceline import PHRASES
+    prompt = (Path(__file__).resolve().parents[1] / "system_prompt.md").read_text(encoding="utf-8")
+    rewritten = {en for _, en in PHRASES}
+    for name in run_eval.SOURCE_NAMES:
+        assert name in prompt or name in rewritten, name
