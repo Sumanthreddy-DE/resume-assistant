@@ -23,7 +23,7 @@ _(none)_
 ---
 
 ## Open — S2 (UX gap, polish, deferred decisions)
-- **document-mentions-and-email-pointers** [later · claude] — 2026-11-28 full run: "laut Lebenslauf" / "so steht es im Lebenslauf" in 3 answers despite rule 13; e-mail pointer under complete answers in 5 (phd, python-years, frontend, bmw, tool-pinn-en); `tool-pinn-en` again infers a link between the 09/2026 push and the 02/2026 thesis end. Candidate fixes: an eval `must_not_match` for "laut (seinem )?Lebenslauf|im Lebenslauf"; rule 3 limits the e-mail to answers where something is missing. *(2026-11-28)*
+- **document-mentions-and-email-pointers** [later · claude] — Prompt `364896d` (rule 3 e-mail only for gaps, rule 13 no document attribution, rule 17 commit date alone) and checks `5358d46` are live since 2026-11-28 11:50 but unmeasured. Next: one full graded run; close if the three "laut Lebenslauf" cases and the five e-mail pointers are gone. *(2026-11-28)*
 - **question-log-review** [weekly · you + claude] — The question log is on since 2026-11-27 (`/var/lib/resume-assistant/questions/`, readable only with sudo). Once a week: `sudo cat` the last days, list the questions the bot could not answer or answered badly, turn them into corpus facts (site backlog) and eval cases here. The first line is the switch-on test question "Testfrage Log: Wo wohnt er?". *(2026-11-27)*
 
 
