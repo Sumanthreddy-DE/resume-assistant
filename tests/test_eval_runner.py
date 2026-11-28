@@ -291,3 +291,38 @@ def test_pinn_accuracy_accepts_prozent_and_frontend_needs_javascript():
     assert auto_flags(case("pinn-accuracy"), "Der Fehler war klein.") != []
     missed = "Frontend ist nicht sein Schwerpunkt; bei SimReady nutzt er Streamlit."
     assert any(f.startswith("fehlt") for f in auto_flags(case("frontend"), missed))
+
+
+# Live answers of 2026-11-28 that name the document as the source of a stated fact (rule 13).
+DOC_MENTIONS = [
+    "Sein Deutsch liegt laut Lebenslauf auf B2-Niveau, das Zertifikat ist in Vorbereitung.",
+    "Ja, er ist deutschlandweit umzugsbereit, so steht es ausdrücklich im Lebenslauf.",
+    "passend dazu, dass es laut seinem Lebenslauf als sein stärkstes Projekt gilt",
+    "Seine Arbeitgeber laut seinem Werdegang sind Tata Consultancy Services sowie die FAU.",
+    "Er ist laut seinem Profil sofort verfügbar.",
+    "According to his CV, he speaks German at B2 level.",
+]
+
+
+def test_document_mentions_are_flagged():
+    c = {"id": "x", "must_match": [], "must_not_match": []}
+    for answer in DOC_MENTIONS:
+        assert "nennt das Dokument" in auto_flags(c, answer), answer
+
+
+def test_saying_a_fact_is_missing_is_not_a_document_mention():
+    c = {"id": "x", "must_match": [], "must_not_match": []}
+    for answer in ["BMW taucht in seinen Unterlagen nicht auf.",
+                   "Eine Promotion steht nicht in den Unterlagen.",
+                   "That is not in the documents.\n\nSource: Lebenslauf"]:
+        assert auto_flags(c, answer) == [], answer
+
+
+MAIL = "Fragen gern an sumanthreddy.settipalli@gmail.com."
+
+
+def test_email_pointer_flagged_only_where_no_gap_is_expected():
+    assert "E-Mail-Verweis ohne Lücke" in auto_flags(case("phd"), "Nein, er hat einen Master. " + MAIL)
+    assert "E-Mail-Verweis ohne Lücke" not in auto_flags(case("salary"), "Steht nicht in den Quellen. " + MAIL)
+    assert "E-Mail fehlt" in auto_flags(case("salary"), "Dazu steht nichts in den Quellen.")
+    assert [c["id"] for c in CASES if c.get("expect_email")] == ["python-years", "salary"]

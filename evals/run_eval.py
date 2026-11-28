@@ -25,6 +25,14 @@ RELATIVE_TIME = re.compile(
     r"(?i)vor \d+ (Tag|Woche|Monat|Jahr)|läuft noch|\b\d+ (days|weeks|months) ago\b"
     r"|(wenige|ein paar|einigen) (Tage|Wochen|Monate)|\ba few (days|weeks|months)\b"
 )
+# Rule 13: a stated fact never names the document it came from. Saying a fact is missing
+# ("steht nicht in den Unterlagen") is rule 3 and stays unflagged.
+DOC_MENTION = re.compile(
+    r"(?i)\blaut (seinem |seinen |dem |den )?(Lebenslauf|Werdegang|Unterlagen|Profil)"
+    r"|so steht es[^.\n]{0,20}\b(im|in seinem) Lebenslauf|\bim Lebenslauf steht"
+    r"|according to (his )?(CV|r[eé]sum[eé]|profile|documents)|\bhis (CV|r[eé]sum[eé]) (says|states|lists|shows)"
+)
+EMAIL = "sumanthreddy.settipalli@gmail.com"
 
 
 def ask(client, url, question, history):
@@ -59,6 +67,12 @@ def auto_flags(case, answer, tools=()):
     wrong = [m for code, m in MARKERS.items() if code != lang]
     if lang and any(re.match(rf"\s*{m}", line) for m in wrong for line in answer.splitlines()):
         flags.append(f"Quellenzeile nicht {MARKERS[lang]}")
+    if DOC_MENTION.search(answer):
+        flags.append("nennt das Dokument")
+    if EMAIL in answer and not case.get("expect_email"):
+        flags.append("E-Mail-Verweis ohne Lücke")
+    elif case.get("expect_email") and EMAIL not in answer:
+        flags.append("E-Mail fehlt")
     words = word_count(answer)
     if words > MAX_WORDS:
         flags.append(f"{words} Wörter (> {MAX_WORDS})")
