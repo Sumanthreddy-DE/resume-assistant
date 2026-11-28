@@ -23,8 +23,8 @@ _(none)_
 ---
 
 ## Open — S2 (UX gap, polish, deferred decisions)
+- **document-mentions-and-email-pointers** [later · claude] — 2026-11-28 full run: "laut Lebenslauf" / "so steht es im Lebenslauf" in 3 answers despite rule 13; e-mail pointer under complete answers in 5 (phd, python-years, frontend, bmw, tool-pinn-en); `tool-pinn-en` again infers a link between the 09/2026 push and the 02/2026 thesis end. Candidate fixes: an eval `must_not_match` for "laut (seinem )?Lebenslauf|im Lebenslauf"; rule 3 limits the e-mail to answers where something is missing. *(2026-11-28)*
 - **question-log-review** [weekly · you + claude] — The question log is on since 2026-11-27 (`/var/lib/resume-assistant/questions/`, readable only with sudo). Once a week: `sudo cat` the last days, list the questions the bot could not answer or answered badly, turn them into corpus facts (site backlog) and eval cases here. The first line is the switch-on test question "Testfrage Log: Wo wohnt er?". *(2026-11-27)*
-- **eval-2026-11-27-findings** [week · claude] — Steps 1, 2, 3, 4 fixed: answer-language hint (`70dbdac`); 40-50 word target, freelance named apart from employers, early-station tools count as strengths, `pinn-accuracy` accepts "Prozent", `frontend` needs JavaScript, `start-de` rephrased (`d046dfc`); subset rerun 2026-11-28: 6 OK, all 43-58 words (`evals/results/2026-11-28-claude-sonnet-5-subset.md`). Open: (1b) daily German practice in the now answers, waits for site backlog `german-practice-into-aktuell-line`; then a full 29-case run, and update the site's `fragen.html` table and the run line on `projekte/lebenslauf-assistent.html` (site repo, from claude-lab). *(found 2026-11-27, claude-lab session)*
 
 
 ---
@@ -43,6 +43,7 @@ _(items currently being worked — move from Open when started, back to Open if 
 
 ## Done this session (2026-11-27)
 
+- **eval-2026-11-27-findings** — done: answer-language hint (`70dbdac`), prompt `d046dfc`, German practice on the Aktuell line (site `cfe4f4c`); full run 2026-11-28: 24 OK, 5 partial, 0 FAIL (`evals/results/2026-11-28-claude-sonnet-5.md`). Site table update filed in the site backlog.
 - **date-aware-deploy-and-eval** — done: `annotate_periods` marks every period finished or running, rule 12 obeys it, thinking on at low effort, 60-word rule; graded runs 2026-11-24 (0 date failures), 2026-11-26 ×2, 2026-11-27 (17 OK, 4 partial, 0 FAIL). Colleague-tone rules 2, 13, 14 (`e461864`); source line rewritten to the question's language in the stream (`sourceline.py`, `9c5906e`).
 - **rerun-now-currentwork** — done: `now-de`, `now-en`, `start-de` all OK with the Aktuell line (`evals/results/2026-11-27-claude-sonnet-5-subset-3.md`); `now-en` pattern accepts "job-hunting". Second sample at 19:46 (`subset-4`): 2 OK, 1 partial; `now-en` used the Aktuell line correctly but dropped daily German practice, so that omission is intermittent.
 - **question-log-switch-on** — done: Datenschutz text live on `impressum.html#datenschutz` and matches `questionlog.py`; new unit with `StateDirectory=` installed, `LOG_QUESTIONS=true`, restarted; a test question landed in `2026-11-27.jsonl`. Weekly review: `question-log-review`.
