@@ -343,3 +343,14 @@ def test_every_allowed_source_name_is_in_the_prompt_or_the_rewrite():
     rewritten = {en for _, en in PHRASES}
     for name in run_eval.SOURCE_NAMES:
         assert name in prompt or name in rewritten, name
+
+
+def test_german_flags_a_wrong_mother_tongue():
+    live = ("Er hat C1-Englisch und ist Hindi-Muttersprachler, Deutsch gibt er aktuell mit B2 an, "
+            "ein Zertifikat ist in Vorbereitung.")
+    assert any("Hindi" in f for f in auto_flags(case("german"), live))
+    assert any("Hindi" in f for f in auto_flags(case("german"), "Deutsch B2, Muttersprache Hindi."))
+    for ok in ["Deutsch B2, dazu Hindi fließend und Telugu als Muttersprache.",
+               "Deutsch auf B2; seine Muttersprache ist Telugu, Hindi spricht er fließend.",
+               "Deutsch – B2 · Hindi – fließend · Telugu – Muttersprache"]:
+        assert auto_flags(case("german"), ok) == [], ok
