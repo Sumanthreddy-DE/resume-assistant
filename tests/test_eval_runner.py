@@ -354,3 +354,13 @@ def test_german_flags_a_wrong_mother_tongue():
                "Deutsch auf B2; seine Muttersprache ist Telugu, Hindi spricht er fließend.",
                "Deutsch – B2 · Hindi – fließend · Telugu – Muttersprache"]:
         assert auto_flags(case("german"), ok) == [], ok
+
+
+def test_frontend_needs_javascript_at_tcs_not_just_the_word():
+    """Live 2026-11-28 run 3: a denial naming "JavaScript-Frameworks" passed the old /JavaScript/ check."""
+    denial = ("Dazu finden sich in den Quellen keine Hinweise auf klassische Frontend-Arbeit wie CSS, "
+              "UI-Design oder JavaScript-Frameworks.")
+    assert any(f.startswith("fehlt") for f in auto_flags(case("frontend"), denial))
+    good = ("Dokumentiert sind Streamlit-Oberflächen (SimReady) sowie JavaScript-basierte UI-Anpassungen "
+            "in ServiceNow bei Tata Consultancy Services.")
+    assert auto_flags(case("frontend"), good) == []

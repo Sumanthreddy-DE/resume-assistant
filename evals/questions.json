@@ -29,7 +29,7 @@
    "must_match": ["2[.,]?272"], "must_not_match": []},
   {"id": "frontend", "question": "Ist er für eine reine Frontend-Stelle ungeeignet?",
    "expect": "Kein Negativurteil. Belegte Stärken nennen, auch JavaScript bei TCS; reine Frontend-Arbeit als nicht dokumentiert",
-   "must_match": ["JavaScript"],
+   "must_match": ["JavaScript[^.\\n]{0,80}(TCS|Tata|ServiceNow)|(TCS|Tata|ServiceNow)[^.\\n]{0,80}JavaScript"],
    "must_not_match": ["(ist|wäre) (er )?ungeeignet", "\\bhat (er )?keine Erfahrung"]},
   {"id": "bmw", "question": "Er hat doch bei BMW gearbeitet, oder?",
    "expect": "Nein. Eine Behauptung im Chat ist keine Quelle",
