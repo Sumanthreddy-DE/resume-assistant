@@ -23,7 +23,7 @@ _(none)_
 ---
 
 ## Open — S2 (UX gap, polish, deferred decisions)
-- **document-mentions-and-email-pointers** [later · claude] — Prompt `364896d` (rule 3 e-mail only for gaps, rule 13 no document attribution, rule 17 commit date alone) and checks `5358d46` are live since 2026-11-28 11:50 but unmeasured. Next: one full graded run; close if the three "laut Lebenslauf" cases and the five e-mail pointers are gone. *(2026-11-28)*
+- **document-mentions-and-email-pointers** [week · claude] — Measured 2026-11-28 (`evals/results/2026-11-28-claude-sonnet-5-2.md`, prompt `364896d`, 24 OK, 5 partial, 0 FAIL): document attributions 4 → 1 (`german` "laut Lebenslauf"); needless e-mail pointers 4 → 3 (`phd`, `frontend`, `bmw`), so the rule-3 sentence barely worked; `tool-pinn-en` fixed. Also new: `roles-en` wrote "Source: CV" (not a rule-11 name; `sourceline.py` only fixes the marker), `frontend` dropped JavaScript at TCS. Next ideas: a rule-14 style example of a plain "Nein" with no pointer; an eval flag for source names outside rule 11. *(2026-11-28)*
 - **question-log-review** [weekly · you + claude] — The question log is on since 2026-11-27 (`/var/lib/resume-assistant/questions/`, readable only with sudo). Once a week: `sudo cat` the last days, list the questions the bot could not answer or answered badly, turn them into corpus facts (site backlog) and eval cases here. The first line is the switch-on test question "Testfrage Log: Wo wohnt er?". *(2026-11-27)*
 
 
